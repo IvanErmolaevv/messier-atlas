@@ -3,158 +3,114 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#080d22" />
-    <meta
-      name="description"
-      content="Интерактивный тренажёр для изучения объектов каталога Мессье."
-    />
-    <title>Messier Atlas — карта неба</title>
+    <meta name="theme-color" content="#f8f7f2" />
+    <meta name="description" content="Светлый интерактивный атлас и тренажёр объектов Мессье." />
+    <title>Messier Atlas — наблюдательный тур</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="ambient ambient--one"></div>
-    <div class="ambient ambient--two"></div>
+    <header class="site-header">
+      <button class="wordmark" data-action="home" type="button" aria-label="Messier Atlas — на главную">
+        <svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="15.5"/><path d="M4 27.5C12 19 28 13 38 12"/><circle cx="13" cy="23" r="1.8"/><circle cx="24" cy="16" r="1.8"/><circle cx="31" cy="28" r="1.8"/></svg>
+        <span>Messier <em>Atlas</em></span>
+      </button>
+      <span class="header-note">Небесный атлас · J2000</span>
+      <button class="header-link" data-action="open-tour" type="button">Наблюдательный тур <span>↗</span></button>
+    </header>
 
-    <main class="app-shell">
-      <aside class="sidebar">
-        <a class="brand" href="#top" aria-label="Messier Atlas — на главную">
-          <span class="brand__mark" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span>Messier <em>Atlas</em></span>
-        </a>
-
-        <div class="eyebrow">Личный планетарий</div>
-        <h1>Учите небо<br />как карту города.</h1>
-        <p class="sidebar__intro">
-          Ориентируйтесь по созвездиям, ярким звёздам и узнаваемым дипскай-объектам.
-        </p>
-
-        <nav class="mode-nav" aria-label="Режим работы">
-          <button class="mode-nav__item is-active" data-mode="learn" type="button">
-            <span class="mode-nav__icon">✦</span>
-            <span><b>Обучение</b><small>Подсказки на карте</small></span>
-            <span class="mode-nav__arrow">→</span>
-          </button>
-          <button class="mode-nav__item" data-mode="train" type="button">
-            <span class="mode-nav__icon">◎</span>
-            <span><b>Тренировка</b><small>Расставьте метки</small></span>
-            <span class="mode-nav__arrow">→</span>
-          </button>
-          <button class="mode-nav__item" data-mode="catalog" type="button">
-            <span class="mode-nav__icon">◌</span>
-            <span><b>Каталог</b><small>Избранные Мессье</small></span>
-            <span class="mode-nav__arrow">→</span>
-          </button>
-        </nav>
-
-        <section class="journey-card" aria-label="Ваш прогресс">
-          <div class="journey-card__top"><span>Ваш путь</span><span id="progress-label">0 / 6</span></div>
-          <div class="progress-bar"><span id="progress-bar"></span></div>
-          <p id="progress-copy">Начните с летнего неба</p>
-        </section>
-
-        <div class="sidebar__footer">
-          <span class="status-dot"></span> Карта эпохи J2000
+    <main>
+      <section class="view view--home is-active" id="home-view" aria-labelledby="home-title">
+        <div class="home-copy">
+          <p class="overline">110 объектов · одна карта неба</p>
+          <h1 id="home-title">Найдите свой<br /><i>путь</i> среди звёзд.</h1>
+          <p class="home-lede">Спокойный атлас для тех, кто хочет узнавать объекты Мессье не по списку, а по настоящим ориентирам ночного неба.</p>
+          <button class="primary-button primary-button--large" data-action="open-tour" type="button">Начать наблюдательный тур <span>→</span></button>
+          <p class="home-footnote">Сначала выберите формат, потом — смотрите, запоминайте и проверяйте себя.</p>
         </div>
-      </aside>
-
-      <section class="workspace" id="top">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow" id="mode-kicker">Сессия 01 · Северное лето</p>
-            <h2 id="mode-title">Ориентиры летнего неба</h2>
+        <div class="home-chart" aria-label="Декоративная карта неба">
+          <div class="chart-paper">
+            <span class="chart-kicker">Карта № 01</span>
+            <svg viewBox="0 0 520 520" role="img" aria-label="Схема созвездий Лиры, Лебедя и Орла">
+              <circle class="chart-orbit" cx="260" cy="260" r="204"/>
+              <circle class="chart-orbit chart-orbit--inner" cx="260" cy="260" r="147"/>
+              <path class="chart-figure" d="M250 137 L307 256 L262 330 L214 254 Z M307 256 L393 165 L353 305 L303 392 M303 392 L395 430"/>
+              <path class="chart-figure chart-figure--thin" d="M126 279 L214 254 L250 137 M393 165 L455 238"/>
+              <g class="chart-stars"><circle cx="250" cy="137" r="8"/><circle cx="307" cy="256" r="5"/><circle cx="262" cy="330" r="4"/><circle cx="214" cy="254" r="4"/><circle cx="393" cy="165" r="6"/><circle cx="353" cy="305" r="5"/><circle cx="303" cy="392" r="6"/><circle cx="395" cy="430" r="3"/><circle cx="126" cy="279" r="4"/><circle cx="455" cy="238" r="3"/></g>
+              <text x="221" y="116">ВЕГА</text><text x="403" y="151">ДЕНЕБ</text><text x="313" y="414">АЛЬТАИР</text>
+              <text class="chart-constellation" x="143" y="214">ГЕРКУЛЕС</text><text class="chart-constellation" x="225" y="365">ЛИРА</text><text class="chart-constellation" x="363" y="350">ЛЕБЕДЬ</text>
+            </svg>
+            <div class="chart-caption"><strong>Летнее небо</strong><span>Первые ориентиры</span></div>
           </div>
-          <div class="topbar__actions">
-            <button class="icon-button" id="sound-button" type="button" aria-label="Включить звук" aria-pressed="false">♬</button>
-            <button class="profile-button" type="button" aria-label="Локальный профиль">ИЭ</button>
-          </div>
-        </header>
+        </div>
+      </section>
 
-        <section class="content-grid">
-          <section class="sky-panel" aria-label="Интерактивная карта неба">
-            <div class="sky-panel__header">
-              <div class="sky-panel__heading">
-                <span class="live-dot"></span>
-                <span id="map-label">Интерактивная карта · северное небо</span>
-              </div>
-              <div class="coordinates"><span>RA 19h 42m</span><span>DEC +33° 12′</span></div>
-            </div>
+      <section class="view view--tour" id="tour-view" aria-labelledby="tour-title" hidden>
+        <div class="tour-heading">
+          <button class="back-link" data-action="home" type="button">← На главную</button>
+          <p class="overline">Наблюдательный тур</p>
+          <h1 id="tour-title">Как хотите<br /><i>изучать небо?</i></h1>
+          <p>Оба режима используют одни и те же светлые карты и фигуры созвездий. Карты и объекты меняются в случайном порядке — маршрут не заканчивается.</p>
+        </div>
+        <div class="mode-cards">
+          <article class="mode-card mode-card--learn">
+            <div class="mode-card__number">01</div>
+            <div class="mode-card__art"><span class="art-star art-star--one"></span><span class="art-star art-star--two"></span><span class="art-line"></span></div>
+            <p class="overline">Открытый атлас</p>
+            <h2>Обучение</h2>
+            <p>Каталоговый режим: смотрите участок неба с названиями объектов, ярких звёзд и созвездий. Переключайте случайные карты столько, сколько нужно.</p>
+            <button class="card-button" data-action="start-learn" type="button">Открыть атлас <span>→</span></button>
+          </article>
+          <article class="mode-card mode-card--practice">
+            <div class="mode-card__number">02</div>
+            <div class="mode-card__art mode-card__art--rings"><span></span><span></span><span></span></div>
+            <p class="overline">Без подсказок</p>
+            <h2>Тренировка</h2>
+            <p>Карта без названий Мессье. Получайте случайный объект, отмечайте его положение и сразу видьте точный ответ. Новые раунды — бесконечно.</p>
+            <button class="card-button" data-action="start-practice" type="button">Начать тренировку <span>→</span></button>
+          </article>
+        </div>
+      </section>
 
-            <div class="sky-map-wrap">
-              <div class="map-orbit orbit-a"></div>
-              <div class="map-orbit orbit-b"></div>
-              <svg id="sky-map" class="sky-map" viewBox="0 0 1200 760" role="img" aria-label="Карта северного летнего неба с созвездиями, яркими звёздами и объектами Мессье">
+      <section class="view view--atlas" id="atlas-view" aria-labelledby="atlas-title" hidden>
+        <div class="atlas-topline">
+          <button class="back-link" data-action="open-tour" type="button">← Наблюдательный тур</button>
+          <div class="atlas-mode"><span id="mode-dot"></span><span id="mode-label">Открытый атлас</span></div>
+          <button class="quiet-button" data-action="new-map" type="button">↻ Другая карта</button>
+        </div>
+        <div class="atlas-heading">
+          <div><p class="overline" id="atlas-overline">Случайный участок неба</p><h1 id="atlas-title">Летний треугольник</h1></div>
+          <p id="atlas-description">Ориентируйтесь по Веге, Денебу и Альтаиру: между ними лежат одни из самых узнаваемых объектов каталога.</p>
+        </div>
+        <div class="atlas-layout">
+          <section class="map-card" aria-label="Карта звёздного неба">
+            <div class="map-card__bar"><span id="map-coordinates">RA 18h–22h · DEC +10°–+50°</span><span>Север · вид без телескопа</span></div>
+            <div class="sky-wrap">
+              <svg id="sky-map" viewBox="0 0 1200 760" role="img" aria-label="Светлая карта неба с фигурами созвездий и объектами Мессье">
                 <defs>
-                  <radialGradient id="skyGlow" cx="51%" cy="43%" r="64%">
-                    <stop offset="0%" stop-color="#182c75" stop-opacity="0.72" />
-                    <stop offset="42%" stop-color="#0d1a47" stop-opacity="0.5" />
-                    <stop offset="100%" stop-color="#070b1d" stop-opacity="0" />
-                  </radialGradient>
-                  <linearGradient id="milkyWay" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#a68cff" stop-opacity="0" />
-                    <stop offset="45%" stop-color="#bcadff" stop-opacity="0.12" />
-                    <stop offset="56%" stop-color="#f6dcff" stop-opacity="0.2" />
-                    <stop offset="100%" stop-color="#a68cff" stop-opacity="0" />
-                  </linearGradient>
-                  <filter id="starGlow" x="-100%" y="-100%" width="300%" height="300%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                  </filter>
-                  <filter id="objectGlow" x="-100%" y="-100%" width="300%" height="300%">
-                    <feGaussianBlur stdDeviation="5" result="blur" />
-                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                  </filter>
-                  <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-                    <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#a4b7ff" stroke-opacity=".09" stroke-width="1" />
-                  </pattern>
+                  <pattern id="skyGrid" width="120" height="95" patternUnits="userSpaceOnUse"><path d="M120 0H0V95" fill="none" stroke="#d4dbe0" stroke-width="1"/></pattern>
+                  <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                 </defs>
-                <rect x="0" y="0" width="1200" height="760" fill="url(#skyGlow)" />
-                <rect x="0" y="0" width="1200" height="760" fill="url(#grid)" />
-                <path d="M-70,688 C280,510 520,460 1280,100 L1280,255 C638,540 320,612 -70,740Z" fill="url(#milkyWay)" />
-                <g id="minor-stars"></g>
-                <g id="constellation-layer"></g>
-                <g id="bright-star-layer"></g>
-                <g id="messier-layer"></g>
-                <g id="marker-layer"></g>
-                <g id="target-layer"></g>
-                <g id="map-tooltip" class="map-tooltip" visibility="hidden">
-                  <rect x="0" y="0" width="178" height="54" rx="9"></rect>
-                  <text x="14" y="22" class="tooltip-title"></text>
-                  <text x="14" y="41" class="tooltip-subtitle"></text>
-                </g>
+                <rect width="1200" height="760" fill="#fffef9"/><rect width="1200" height="760" fill="url(#skyGrid)" opacity=".62"/>
+                <g id="minor-stars"></g><g id="boundary-layer"></g><g id="figure-layer"></g><g id="star-layer"></g><g id="messier-layer"></g><g id="answer-layer"></g><g id="marker-layer"></g>
               </svg>
-              <div class="map-direction map-direction--n">N</div>
-              <div class="map-direction map-direction--e">E</div>
-              <div class="map-scale"><span></span> 10°</div>
-              <div class="map-hint" id="map-hint"><kbd>Нажмите</kbd> на объект, чтобы узнать больше</div>
+              <div class="map-north">N <span>↑</span></div><div class="map-scale"><i></i> 10°</div>
+              <div class="map-instruction" id="map-instruction">Нажмите на объект для карточки</div>
             </div>
-
-            <div class="map-tools">
-              <div class="layer-controls" aria-label="Слои карты">
-                <label class="layer-toggle"><input id="constellation-toggle" type="checkbox" checked /><span></span>Созвездия</label>
-                <label class="layer-toggle"><input id="stars-toggle" type="checkbox" checked /><span></span>Имена звёзд</label>
-                <label class="layer-toggle"><input id="guides-toggle" type="checkbox" checked /><span></span>Подсказки Мессье</label>
-              </div>
-              <button class="reset-map" id="reset-map" type="button">↺ Сбросить вид</button>
+            <div class="map-controls" aria-label="Слои карты">
+              <label><input id="figures-toggle" type="checkbox" checked/><span></span>Фигуры созвездий</label>
+              <label><input id="stars-toggle" type="checkbox" checked/><span></span>Имена звёзд</label>
+              <label><input id="grid-toggle" type="checkbox" checked/><span></span>Координатная сетка</label>
+              <span class="map-legend"><b>•</b> объект Мессье</span>
             </div>
           </section>
-
-          <aside class="lesson-panel" id="lesson-panel">
-            <div class="lesson-panel__top">
-              <div class="lesson-number"><span>Урок</span><b>01</b></div>
-              <span class="duration">~ 8 мин</span>
-            </div>
-            <div id="lesson-content"></div>
-          </aside>
-        </section>
+          <aside class="side-panel" id="side-panel"></aside>
+        </div>
+        <p class="atlas-note">Фигуры созвездий показаны в общеупотребимой европейской схеме; названия и области ориентированы на стандарт IAU.</p>
       </section>
     </main>
-
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
   </body>

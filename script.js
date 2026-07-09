@@ -1,365 +1,63 @@
-const svg = document.querySelector('#sky-map');
 const layers = {
-  constellations: document.querySelector('#constellation-layer'),
-  stars: document.querySelector('#bright-star-layer'),
-  messier: document.querySelector('#messier-layer'),
-  markers: document.querySelector('#marker-layer'),
-  targets: document.querySelector('#target-layer'),
-  minor: document.querySelector('#minor-stars'),
+  minor: document.querySelector('#minor-stars'), boundary: document.querySelector('#boundary-layer'),
+  figures: document.querySelector('#figure-layer'), stars: document.querySelector('#star-layer'),
+  messier: document.querySelector('#messier-layer'), answers: document.querySelector('#answer-layer'), markers: document.querySelector('#marker-layer')
 };
-
-const lessonPanel = document.querySelector('#lesson-content');
+const map = document.querySelector('#sky-map');
+const skyWrap = document.querySelector('.sky-wrap');
+const sidePanel = document.querySelector('#side-panel');
 const toast = document.querySelector('#toast');
-const mapHint = document.querySelector('#map-hint');
-const mapLabel = document.querySelector('#map-label');
-const modeTitle = document.querySelector('#mode-title');
-const modeKicker = document.querySelector('#mode-kicker');
-const stored = JSON.parse(localStorage.getItem('messier-atlas-progress') || '{}');
 
-const objects = [
-  { id: 'M13', name: 'Большое скопление Геркулеса', type: 'шаровое скопление', x: 372, y: 248, constellation: 'Геркулес', code: 'NGC 6205' },
-  { id: 'M92', name: 'Шаровое скопление', type: 'шаровое скопление', x: 292, y: 168, constellation: 'Геркулес', code: 'NGC 6341' },
-  { id: 'M57', name: 'Кольцевая туманность', type: 'планетарная туманность', x: 548, y: 251, constellation: 'Лира', code: 'NGC 6720' },
-  { id: 'M27', name: 'Гантель', type: 'планетарная туманность', x: 746, y: 267, constellation: 'Лисичка', code: 'NGC 6853' },
-  { id: 'M15', name: 'Скопление Пегаса', type: 'шаровое скопление', x: 984, y: 206, constellation: 'Пегас', code: 'NGC 7078' },
-  { id: 'M11', name: 'Дикая Утка', type: 'рассеянное скопление', x: 704, y: 548, constellation: 'Щит', code: 'NGC 6705' },
-  { id: 'M16', name: 'Туманность Орёл', type: 'эмиссионная туманность', x: 573, y: 605, constellation: 'Змея', code: 'NGC 6611' },
-  { id: 'M17', name: 'Туманность Омега', type: 'эмиссионная туманность', x: 649, y: 614, constellation: 'Стрелец', code: 'NGC 6618' },
-  { id: 'M20', name: 'Трёхраздельная', type: 'эмиссионная туманность', x: 524, y: 668, constellation: 'Стрелец', code: 'NGC 6514' },
-  { id: 'M22', name: 'Шаровое скопление', type: 'шаровое скопление', x: 466, y: 623, constellation: 'Стрелец', code: 'NGC 6656' },
-  { id: 'M8', name: 'Лагуна', type: 'эмиссионная туманность', x: 410, y: 691, constellation: 'Стрелец', code: 'NGC 6523' },
-  { id: 'M39', name: 'Рассеянное скопление', type: 'рассеянное скопление', x: 779, y: 125, constellation: 'Лебедь', code: 'NGC 7092' },
+const zones = [
+  { id:'summer', title:'Летний треугольник', constellation:'Лира · Лебедь · Геркулес', coords:'RA 18h–22h · DEC +10°–+50°', description:'Вега, Денеб и Альтаир создают самый удобный летний маршрут. Между ними — туманности и шаровые скопления, которые легко привязать к фигурам созвездий.',
+    stars:[['Вега','α Lyr',445,168,6],['Шелиак','β Lyr',497,274,3],['Денеб','α Cyg',786,154,5],['Садр','γ Cyg',710,280,4],['Альтаир','α Aql',670,492,5],['Таразед','γ Aql',628,519,3],['Рас Альгети','α Her',260,299,4],['Арктур','α Boo',150,232,5]],
+    figures:[['ЛИРА',430,102,'M445 168 L497 274 L457 320 L408 270 Z'],['ЛЕБЕДЬ',782,326,'M786 154 L710 280 L756 381 L670 492 M710 280 L631 330 M710 280 L810 351'],['ГЕРКУЛЕС',225,127,'M150 232 L223 196 L302 230 L332 324 L260 359 L193 305 Z'],['ОРЁЛ',612,582,'M628 519 L670 492 L721 531 M670 492 L661 585']],
+    objects:[['M13','Большое скопление Геркулеса','шаровое скопление',310,270],['M92','Шаровое скопление','шаровое скопление',232,188],['M57','Кольцевая туманность','планетарная туманность',469,237],['M27','Гантель','планетарная туманность',653,286],['M15','Скопление Пегаса','шаровое скопление',975,211],['M39','Рассеянное скопление','рассеянное скопление',841,126]] },
+  { id:'sagittarius', title:'Стрелец и Скорпион', constellation:'Стрелец · Скорпион · Змееносец', coords:'RA 16h–19h · DEC −40°–−5°', description:'Самая плотная часть Млечного Пути. Ищите «чайник» Стрельца и крючок Скорпиона — рядом собраны туманности и скопления Мессье.',
+    stars:[['Антарес','α Sco',295,268,6],['Шаула','λ Sco',428,514,4],['Каус Аустралис','ε Sgr',762,486,4],['Нунки','σ Sgr',708,314,4],['Сабик','η Oph',497,170,4],['Аль Насл','γ Sgr',624,447,3]],
+    figures:[['СКОРПИОН',176,170,'M295 268 L243 326 L218 394 L274 464 L355 441 L402 487 L428 514'],['СТРЕЛЕЦ',655,212,'M624 447 L690 393 L762 486 L802 406 L747 334 L708 314 L690 393 M747 334 L810 296'],['ЗМЕЕНОСЕЦ',438,91,'M497 170 L450 235 L475 314 L548 336 L592 271 L497 170']],
+    objects:[['M6','Бабочка','рассеянное скопление',361,444],['M7','Скопление Птолемея','рассеянное скопление',406,480],['M8','Лагуна','эмиссионная туманность',646,440],['M20','Трёхраздельная','эмиссионная туманность',692,419],['M22','Шаровое скопление','шаровое скопление',710,356],['M24','Облако Стрельца','звёздное облако',757,371]] },
+  { id:'spring', title:'Весенние галактики', constellation:'Большая Медведица · Гончие Псы · Волосы Вероники', coords:'RA 11h–14h · DEC +30°–+65°', description:'Здесь нет яркой Млечной Дороги — зато в телескопе одна за другой открываются далёкие галактики. Ориентир — ковш Большой Медведицы.',
+    stars:[['Дубхе','α UMa',252,181,5],['Мерак','β UMa',336,254,4],['Алиот','ε UMa',468,302,5],['Мицар','ζ UMa',570,335,4],['Алькаид','η UMa',674,358,4],['Кор Кароли','α CVn',512,520,4],['Арктур','α Boo',787,584,6]],
+    figures:[['БОЛЬШАЯ МЕДВЕДИЦА',242,99,'M252 181 L336 254 L437 220 L468 302 L570 335 L674 358 L744 413 M437 220 L468 302'],['ГОНЧИЕ ПСЫ',467,461,'M512 520 L585 477 L623 531'],['ВОЛОСЫ ВЕРОНИКИ',735,487,'M674 358 L735 442 L787 584 L853 495']],
+    objects:[['M51','Водоворот','спиральная галактика',606,316],['M63','Подсолнух','спиральная галактика',559,393],['M94','Галактика Кошачий глаз','спиральная галактика',487,458],['M101','Вертушка','спиральная галактика',683,242],['M64','Чёрный глаз','спиральная галактика',640,468],['M106','Галактика','спиральная галактика',388,362]] },
+  { id:'winter', title:'Зимние скопления', constellation:'Возничий · Близнецы · Большой Пёс', coords:'RA 5h–8h · DEC −25°–+45°', description:'Холодный сезон — лучшее время для ярких рассеянных скоплений. Двигайтесь от Капеллы к звёздам Близнецов и вниз, к Сириусу.',
+    stars:[['Капелла','α Aur',342,150,6],['Менкалинан','β Aur',417,256,4],['Кастор','α Gem',665,185,5],['Поллукс','β Gem',633,278,5],['Бетельгейзе','α Ori',450,465,5],['Сириус','α CMa',770,585,6]],
+    figures:[['ВОЗНИЧИЙ',266,89,'M342 150 L417 256 L366 344 L281 286 Z'],['БЛИЗНЕЦЫ',596,105,'M665 185 L633 278 L605 375 M665 185 L735 264 L761 360'],['БОЛЬШОЙ ПЁС',697,459,'M610 450 L688 516 L770 585 L850 526']],
+    objects:[['M35','Рассеянное скопление','рассеянное скопление',687,307],['M36','Рассеянное скопление','рассеянное скопление',339,257],['M37','Рассеянное скопление','рассеянное скопление',381,290],['M38','Морская звезда','рассеянное скопление',293,277],['M41','Рассеянное скопление','рассеянное скопление',743,545],['M46','Рассеянное скопление','рассеянное скопление',622,570]] }
 ];
 
-const missionIds = ['M13', 'M92', 'M57', 'M27', 'M15', 'M11'];
-const mission = missionIds.map((id) => objects.find((object) => object.id === id));
+let currentZone = 0, mode = 'learn', currentTarget = null, answer = null, marker = null, score = 0, streak = 0, toastTimer;
+const el = (name, attrs={}, text='') => { const node=document.createElementNS('http://www.w3.org/2000/svg',name); Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v)); if(text)node.textContent=text; return node; };
+const zone = () => zones[currentZone];
+const objectFrom = (item) => ({id:item[0],name:item[1],type:item[2],x:item[3],y:item[4]});
 
-const stars = [
-  { name: 'Вега', latin: 'Vega · α Lyr', x: 503, y: 191, r: 6.5 },
-  { name: 'Денеб', latin: 'Deneb · α Cyg', x: 798, y: 166, r: 5.2 },
-  { name: 'Альтаир', latin: 'Altair · α Aql', x: 736, y: 436, r: 5.3 },
-  { name: 'Арктур', latin: 'Arcturus · α Boo', x: 196, y: 289, r: 5.8 },
-  { name: 'Антарес', latin: 'Antares · α Sco', x: 309, y: 632, r: 5.8 },
-  { name: 'Альферац', latin: 'Alpheratz · α And', x: 1025, y: 169, r: 4.5 },
-  { name: 'Рас Альгети', latin: 'α Her', x: 337, y: 329, r: 4.1 },
-  { name: 'Садр', latin: 'γ Cyg', x: 729, y: 269, r: 4.1 },
-  { name: 'Шелиак', latin: 'β Lyr', x: 555, y: 287, r: 3.4 },
-  { name: 'Таразед', latin: 'γ Aql', x: 690, y: 462, r: 3.4 },
-];
-
-const constellations = [
-  { name: 'ГЕРКУЛЕС', x: 281, y: 142, path: 'M205 244 L264 198 L338 218 L394 289 L337 330 L264 299 L205 244' },
-  { name: 'ЛИРА', x: 510, y: 121, path: 'M503 191 L555 287 L519 322 L474 280 L503 191' },
-  { name: 'ЛЕБЕДЬ', x: 811, y: 302, path: 'M798 166 L729 269 L777 373 L736 436 M729 269 L654 326 M729 269 L828 338' },
-  { name: 'ОРЁЛ', x: 674, y: 495, path: 'M690 462 L736 436 L779 474 M736 436 L725 515' },
-  { name: 'ПЕГАС', x: 1001, y: 294, path: 'M1025 169 L1091 243 L1033 315 L963 244 L1025 169' },
-  { name: 'СТРЕЛЕЦ', x: 461, y: 584, path: 'M430 548 L466 623 L524 668 L574 626 L533 574 L466 623 M524 668 L410 691' },
-  { name: 'СКОРПИОН', x: 252, y: 530, path: 'M309 632 L278 564 L250 498 L227 433 L196 405 M309 632 L271 675 L322 713' },
-];
-
-let mode = 'learn';
-let selectedObject = null;
-let placements = {};
-let result = null;
-let soundOn = false;
-let toastTimer = null;
-
-function svgEl(name, attrs = {}, text = '') {
-  const el = document.createElementNS('http://www.w3.org/2000/svg', name);
-  Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
-  if (text) el.textContent = text;
-  return el;
+function setView(name){
+  ['home','tour','atlas'].forEach((view)=>{const section=document.querySelector(`#${view}-view`);section.hidden=view!==name;section.classList.toggle('is-active',view===name);});
+  window.scrollTo({top:0,behavior:'auto'});
 }
-
-function renderBackgroundStars() {
-  const fixedStars = Array.from({ length: 105 }, (_, index) => {
-    const x = (index * 137.50776405) % 1180 + 10;
-    const y = (index * 61.80339887) % 720 + 20;
-    const r = [0.8, 1, 1.2, 1.4][index % 4];
-    return { x, y, r, o: 0.2 + (index % 6) * 0.07 };
-  });
-  layers.minor.innerHTML = '';
-  fixedStars.forEach((star) => layers.minor.append(svgEl('circle', { class: 'minor-star', cx: star.x, cy: star.y, r: star.r, opacity: star.o })));
-}
-
-function renderConstellations() {
-  layers.constellations.innerHTML = '';
-  constellations.forEach((constellation) => {
-    layers.constellations.append(svgEl('path', { class: 'constellation-line', d: constellation.path }));
-    layers.constellations.append(svgEl('text', { class: 'constellation-label', x: constellation.x, y: constellation.y }, constellation.name));
-  });
-}
-
-function renderStars() {
-  layers.stars.innerHTML = '';
-  stars.forEach((star) => {
-    const group = svgEl('g', { class: 'named-star' });
-    group.append(svgEl('circle', { class: 'bright-star', cx: star.x, cy: star.y, r: star.r + 5, opacity: 0.1 }));
-    group.append(svgEl('circle', { class: 'bright-star', cx: star.x, cy: star.y, r: star.r }));
-    group.append(svgEl('circle', { class: 'star-core', cx: star.x, cy: star.y, r: Math.max(1.2, star.r / 3) }));
-    const labelX = star.x + (star.x > 900 ? -12 : 12);
-    const anchor = star.x > 900 ? 'end' : 'start';
-    group.append(svgEl('text', { class: 'star-label', x: labelX, y: star.y - 8, 'text-anchor': anchor }, star.name));
-    group.append(svgEl('text', { class: 'star-label-sub', x: labelX, y: star.y + 8, 'text-anchor': anchor }, star.latin));
-    layers.stars.append(group);
-  });
-}
-
-function renderMessier() {
-  layers.messier.innerHTML = '';
-  const show = mode === 'learn' || mode === 'catalog';
-  if (!show) return;
-  objects.forEach((object) => {
-    const group = svgEl('g', { class: 'messier-object', tabindex: '0', role: 'button', 'aria-label': `${object.id}, ${object.name}` });
-    group.dataset.objectId = object.id;
-    group.append(svgEl('circle', { class: 'object-halo', cx: object.x, cy: object.y, r: 21 }));
-    group.append(svgEl('circle', { class: 'object-ring', cx: object.x, cy: object.y, r: 11 }));
-    group.append(svgEl('text', { class: 'object-code', x: object.x, y: object.y + 0.5 }, object.id));
-    if (mode === 'learn') {
-      group.append(svgEl('line', { class: 'object-guide', x1: object.x + 12, y1: object.y + 4, x2: object.x + 31, y2: object.y + 18 }));
-      group.append(svgEl('text', { class: 'object-label', x: object.x + 35, y: object.y + 17 }, object.name));
-      group.append(svgEl('text', { class: 'object-name', x: object.x + 35, y: object.y + 31 }, `${object.constellation} · ${object.type}`));
-    }
-    group.addEventListener('mouseenter', () => showObjectTip(object));
-    group.addEventListener('mouseleave', hideObjectTip);
-    group.addEventListener('focus', () => showObjectTip(object));
-    group.addEventListener('blur', hideObjectTip);
-    group.addEventListener('click', (event) => { event.stopPropagation(); showObjectInfo(object); });
-    layers.messier.append(group);
-  });
-}
-
-function showObjectTip(object) {
-  const tooltip = document.querySelector('#map-tooltip');
-  tooltip.setAttribute('visibility', 'visible');
-  tooltip.setAttribute('transform', `translate(${Math.min(object.x + 16, 1005)} ${Math.max(object.y - 62, 10)})`);
-  tooltip.querySelector('.tooltip-title').textContent = `${object.id} · ${object.name}`;
-  tooltip.querySelector('.tooltip-subtitle').textContent = `${object.constellation} · ${object.type}`;
-}
-
-function hideObjectTip() { document.querySelector('#map-tooltip').setAttribute('visibility', 'hidden'); }
-
-function renderMarkers() {
-  layers.markers.innerHTML = '';
-  Object.entries(placements).forEach(([id, point]) => {
-    const group = svgEl('g', { class: 'user-marker' });
-    group.append(svgEl('circle', { class: 'marker-ring', cx: point.x, cy: point.y, r: 13 }));
-    group.append(svgEl('circle', { cx: point.x, cy: point.y, r: 3, fill: '#7ee5e2' }));
-    group.append(svgEl('text', { class: 'marker-code', x: point.x, y: point.y + 23 }, id));
-    layers.markers.append(group);
-  });
-}
-
-function renderTargets() {
-  layers.targets.innerHTML = '';
-  if (mode !== 'train' || !result) return;
-  mission.forEach((object) => {
-    const placed = placements[object.id];
-    const distance = placed ? Math.hypot(placed.x - object.x, placed.y - object.y) : Infinity;
-    const target = svgEl('circle', { class: `target-ring${distance < 48 ? ' is-correct' : ''}`, cx: object.x, cy: object.y, r: 24 });
-    layers.targets.append(target);
-  });
-}
-
-function updateLayers() {
-  document.querySelector('#constellation-layer').style.display = document.querySelector('#constellation-toggle').checked ? '' : 'none';
-  document.querySelector('#bright-star-layer').style.display = document.querySelector('#stars-toggle').checked ? '' : 'none';
-  document.querySelector('#messier-layer').style.display = document.querySelector('#guides-toggle').checked ? '' : 'none';
-}
-
-function renderLearnPanel() {
-  lessonPanel.innerHTML = `
-    <h3>Летний треугольник<br />и его сокровища</h3>
-    <p>Начните с трёх очень ярких звёзд: Веги, Денеба и Альтаира. Между ними легко найти первые объекты Мессье.</p>
-    <div class="focus-object">
-      <div class="focus-object__mark">M57</div>
-      <div><b>Объект-ориентир</b><small>Кольцевая туманность в Лире</small></div>
-    </div>
-    <div class="clue-list">
-      <div class="clue"><i>1</i><span>Найдите Вегу — самую яркую точку у «маленькой лиры».</span></div>
-      <div class="clue"><i>2</i><span>Пройдите к Шелиаку: М57 лежит прямо между ними.</span></div>
-      <div class="clue"><i>3</i><span>Повторите маршрут глазами, не читая подписи.</span></div>
-    </div>
-    <button class="primary-button" id="start-training" type="button">Проверить себя →</button>
-  `;
-  document.querySelector('#start-training').addEventListener('click', () => setMode('train'));
-}
-
-function renderTrainPanel() {
-  const placedCount = Object.keys(placements).length;
-  const choices = mission.map((object) => `
-    <button class="object-choice ${selectedObject === object.id ? 'is-selected' : ''} ${placements[object.id] ? 'is-placed' : ''}" data-choice="${object.id}" type="button">
-      <span class="object-choice__code">${object.id}</span><span class="object-choice__name">${object.name}</span>${placements[object.id] ? '<span class="object-choice__tick">✓</span>' : ''}
-    </button>`).join('');
-  const score = result ? result.score : null;
-  lessonPanel.innerHTML = `
-    <h3>Расставьте<br />все шесть меток</h3>
-    <p>Выберите объект, затем кликните на его предполагаемое место на карте. Подписи Мессье скрыты — оставлены только ориентиры.</p>
-    ${score !== null ? `<div class="score-card"><div class="score-card__numbers"><strong>${score}/6</strong><span>${score === 6 ? 'МАРШРУТ ВЫУЧЕН' : 'ЕЩЁ ОДНА ПОПЫТКА'}</span></div><p>${score === 6 ? 'Отлично! Вы уже читаете этот участок неба.' : 'Зелёные окружности показывают точные позиции. Сравните их со своими метками.'}</p></div>` : `<p class="train-note">${selectedObject ? `Выбран ${selectedObject}. Кликните на карту.` : `Выберите объект ниже. Меток: ${placedCount} из 6.`}</p>`}
-    <div class="object-list">${choices}</div>
-    <button class="primary-button" id="check-answers" type="button" ${placedCount < mission.length ? 'disabled' : ''}>${score !== null ? 'Проверить ещё раз' : 'Проверить позиции'}</button>
-    <button class="secondary-button" id="clear-markers" type="button">Сбросить метки</button>
-  `;
-  lessonPanel.querySelectorAll('[data-choice]').forEach((button) => button.addEventListener('click', () => {
-    selectedObject = button.dataset.choice;
-    result = null;
-    renderTrainPanel();
-    showToast(`Выбран ${selectedObject}. Отметьте его место на небе.`);
-  }));
-  lessonPanel.querySelector('#check-answers').addEventListener('click', checkAnswers);
-  lessonPanel.querySelector('#clear-markers').addEventListener('click', clearMarkers);
-}
-
-function renderCatalogPanel() {
-  const catalogue = objects.slice(0, 10).map((object) => `<article class="catalog-item"><b>${object.id}</b><span>${object.name}</span><small>${object.type}</small></article>`).join('');
-  lessonPanel.innerHTML = `
-    <h3>Мессье —<br />живой каталог</h3>
-    <p class="catalogue-intro">110 объектов для наблюдателей XVIII века и для нас. Ниже — ориентиры этой карты.</p>
-    <div class="catalog-grid">${catalogue}</div>
-    <button class="secondary-button" id="back-to-learn" type="button">← Вернуться к уроку</button>
-  `;
-  document.querySelector('#back-to-learn').addEventListener('click', () => setMode('learn'));
-}
-
-function renderPanel() {
-  if (mode === 'learn') renderLearnPanel();
-  if (mode === 'train') renderTrainPanel();
-  if (mode === 'catalog') renderCatalogPanel();
-}
-
-function setMode(nextMode) {
-  mode = nextMode;
-  selectedObject = null;
-  result = null;
-  const titles = {
-    learn: ['Сессия 01 · Северное лето', 'Ориентиры летнего неба', 'Интерактивная карта · северное небо', 'Нажмите на объект, чтобы узнать больше'],
-    train: ['Тренировка · Шесть объектов', 'Поставьте метки по памяти', 'Тренировочная карта · подписи скрыты', 'Выберите объект и кликните на карту'],
-    catalog: ['Атлас · Избранные объекты', 'Каталог Мессье', 'Карта-атлас · все подсказки', 'Нажмите на объект, чтобы открыть карточку'],
-  };
-  const [kicker, title, label, hint] = titles[mode];
-  modeKicker.textContent = kicker;
-  modeTitle.textContent = title;
-  mapLabel.textContent = label;
-  mapHint.innerHTML = mode === 'train' ? `<kbd>Выберите объект</kbd> и отметьте позицию` : `<kbd>Нажмите</kbd> на объект, чтобы узнать больше`;
-  document.querySelectorAll('[data-mode]').forEach((button) => button.classList.toggle('is-active', button.dataset.mode === mode));
-  document.querySelector('#guides-toggle').checked = mode !== 'train';
-  renderMessier();
-  renderMarkers();
-  renderTargets();
-  renderPanel();
+function randomZone(){let next=currentZone;if(zones.length>1){while(next===currentZone)next=Math.floor(Math.random()*zones.length);}currentZone=next;}
+function renderMinor(){layers.minor.innerHTML='';for(let i=0;i<115;i++){const x=((i*137.5)%1160)+20,y=((i*71.3)%720)+15;layers.minor.append(el('circle',{class:'minor-star',cx:x,cy:y,r:[.6,.8,1,1.2][i%4],opacity:.22+(i%5)*.1}));}}
+function renderMap(){
+  const data=zone(); layers.boundary.innerHTML='';layers.figures.innerHTML='';layers.stars.innerHTML='';layers.messier.innerHTML='';layers.answers.innerHTML='';layers.markers.innerHTML='';
+  data.figures.forEach(([name,x,y,path],index)=>{layers.boundary.append(el('path',{class:'constellation-boundary',d:path.replaceAll('M','M').replaceAll(' L',' L')}));layers.figures.append(el('path',{class:'constellation-figure',d:path}));layers.figures.append(el('text',{class:'constellation-label',x,y},name));});
+  data.stars.forEach(([name,latin,x,y,r])=>{const g=el('g',{});g.append(el('circle',{class:'bright-star',cx:x,cy:y,r:r+4,opacity:.14}));g.append(el('circle',{class:'bright-star',cx:x,cy:y,r}));g.append(el('circle',{class:'bright-star-core',cx:x,cy:y,r:Math.max(1.4,r/3)}));g.append(el('text',{class:'star-name',x:x+11,y:y-7},name));g.append(el('text',{class:'star-sub',x:x+11,y:y+9},latin));layers.stars.append(g);});
+  if(mode==='learn')data.objects.forEach((item)=>{const object=objectFrom(item),g=el('g',{class:'messier-object',role:'button',tabindex:'0','aria-label':`${object.id}, ${object.name}`});g.append(el('circle',{class:'object-halo',cx:object.x,cy:object.y,r:19}));g.append(el('circle',{class:'object-core',cx:object.x,cy:object.y,r:5.5}));g.append(el('line',{class:'object-guide',x1:object.x+7,y1:object.y-4,x2:object.x+25,y2:object.y-18}));g.append(el('text',{class:'object-id',x:object.x+29,y:object.y-20},object.id));g.append(el('text',{class:'object-name',x:object.x+29,y:object.y-7},object.name));g.addEventListener('click',(event)=>{event.stopPropagation();showToast(`${object.id} — ${object.name}, ${object.type}.`);});layers.messier.append(g);});
+  if(mode==='practice'&&answer){const ringClass=answer.correct?'answer-ring':'answer-ring is-wrong';layers.answers.append(el('circle',{class:ringClass,cx:currentTarget.x,cy:currentTarget.y,r:25}));}
+  if(marker){layers.markers.append(el('circle',{class:'placed-marker',cx:marker.x,cy:marker.y,r:10}));layers.markers.append(el('text',{class:'placed-marker-label',x:marker.x,y:marker.y+25},currentTarget.id));}
   updateLayers();
 }
-
-function showObjectInfo(object) {
-  const index = objects.indexOf(object) + 1;
-  showToast(`${object.id} — ${object.name}. ${object.type}, созвездие ${object.constellation}.`);
-  if (mode === 'learn') {
-    document.querySelectorAll('.focus-object__mark').forEach((mark) => { mark.textContent = object.id; });
-    const small = document.querySelector('.focus-object small');
-    if (small) small.textContent = `${object.name} · ${object.constellation}`;
-  }
-  return index;
-}
-
-function getMapPoint(event) {
-  const box = svg.getBoundingClientRect();
-  return {
-    x: ((event.clientX - box.left) / box.width) * 1200,
-    y: ((event.clientY - box.top) / box.height) * 760,
-  };
-}
-
-function placeMarker(event) {
-  if (mode !== 'train') return;
-  if (!selectedObject) {
-    showToast('Сначала выберите объект справа.');
-    return;
-  }
-  placements[selectedObject] = getMapPoint(event);
-  if (soundOn) playTone(460, 0.06);
-  selectedObject = null;
-  result = null;
-  renderMarkers();
-  renderTrainPanel();
-}
-
-function checkAnswers() {
-  if (Object.keys(placements).length !== mission.length) return;
-  const correct = mission.filter((object) => Math.hypot(placements[object.id].x - object.x, placements[object.id].y - object.y) < 48);
-  result = { score: correct.length };
-  if (correct.length > (stored.best || 0)) {
-    stored.best = correct.length;
-    localStorage.setItem('messier-atlas-progress', JSON.stringify(stored));
-  }
-  updateProgress();
-  renderTargets();
-  renderTrainPanel();
-  if (soundOn) playTone(correct.length === 6 ? 740 : 320, 0.14);
-  showToast(correct.length === 6 ? 'Великолепно! Этот участок неба выучен.' : `Точно: ${correct.length} из 6. Зелёные круги подскажут маршрут.`);
-}
-
-function clearMarkers() {
-  placements = {};
-  selectedObject = null;
-  result = null;
-  renderMarkers();
-  renderTargets();
-  renderTrainPanel();
-  showToast('Метки очищены. Начнём заново.');
-}
-
-function updateProgress() {
-  const best = stored.best || 0;
-  document.querySelector('#progress-label').textContent = `${best} / 6`;
-  document.querySelector('#progress-bar').style.width = `${(best / 6) * 100}%`;
-  document.querySelector('#progress-copy').textContent = best === 6 ? 'Летний маршрут освоен ✦' : best ? `Лучший результат: ${best} из 6` : 'Начните с летнего неба';
-}
-
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add('is-visible');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 3600);
-}
-
-function playTone(frequency, duration) {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const context = new AudioContext();
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
-    gain.gain.setValueAtTime(0.04, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
-    oscillator.connect(gain).connect(context.destination);
-    oscillator.start(); oscillator.stop(context.currentTime + duration);
-  } catch (_) { /* Sound is a small optional enhancement. */ }
-}
-
-document.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
-svg.addEventListener('click', placeMarker);
-document.querySelector('#constellation-toggle').addEventListener('change', updateLayers);
-document.querySelector('#stars-toggle').addEventListener('change', updateLayers);
-document.querySelector('#guides-toggle').addEventListener('change', updateLayers);
-document.querySelector('#reset-map').addEventListener('click', () => {
-  hideObjectTip();
-  document.querySelector('#constellation-toggle').checked = true;
-  document.querySelector('#stars-toggle').checked = true;
-  document.querySelector('#guides-toggle').checked = mode !== 'train';
-  updateLayers();
-  showToast('Слои карты возвращены к исходному виду.');
-});
-document.querySelector('#sound-button').addEventListener('click', (event) => {
-  soundOn = !soundOn;
-  event.currentTarget.setAttribute('aria-pressed', String(soundOn));
-  event.currentTarget.setAttribute('aria-label', soundOn ? 'Выключить звук' : 'Включить звук');
-  showToast(soundOn ? 'Звуковые сигналы включены.' : 'Звуковые сигналы выключены.');
-  if (soundOn) playTone(620, 0.07);
-});
-
-renderBackgroundStars();
-renderConstellations();
-renderStars();
-updateProgress();
-setMode('learn');
+function renderLearnPanel(){const points=zone().objects.map((item)=>{const object=objectFrom(item);return `<div class="zone-point"><span class="zone-point__id">${object.id}</span><span><strong>${object.name}</strong><small>${object.type}</small></span></div>`;}).join('');sidePanel.innerHTML=`<p class="overline">Открытый атлас</p><h2>${zone().title}</h2><p class="intro">Участок можно изучать сколько угодно: новая карта выбирается случайно, а подписи остаются на месте.</p><div class="zone-points">${points}</div><button class="primary-button" data-action="next-learn" type="button">Следующий случайный участок <span>→</span></button><button class="secondary-button" data-action="start-practice" type="button">Проверить себя без подписей</button>`;}
+function renderPracticePanel(){const result=answer?`<p class="answer-copy ${answer.correct?'':'is-wrong'}">${answer.correct?'Точно! Вы нашли объект по звёздным ориентирам.':'Почти. Окружность на карте показывает точное место объекта.'}</p>`:`<p class="answer-copy">Ориентируйтесь по фигурам созвездий и ярким звёздам. Метка появится после клика.</p>`;sidePanel.innerHTML=`<p class="overline">Бесконечная тренировка</p><h2>Поставьте метку<br />на карте</h2><p class="intro">Карта обновляется случайными участками. Названия Мессье скрыты.</p><div class="practice-target"><span class="practice-target__label">Найдите объект</span><strong>${currentTarget.id}</strong><span>${currentTarget.name}<br />${currentTarget.type}</span></div><div class="score-row"><span>Точно найдено</span><b>${score}</b><span>Серия: ${streak}</span></div>${result}<button class="primary-button" data-action="next-practice" type="button">${answer?'Следующий объект →':'Нужна метка на карте'}</button><button class="secondary-button" data-action="new-map" type="button">Случайная карта</button>`;const button=sidePanel.querySelector('[data-action="next-practice"]');if(!answer)button.disabled=true;}
+function updateScreen(){const data=zone();document.querySelector('#atlas-title').textContent=data.title;document.querySelector('#atlas-overline').textContent=mode==='learn'?'Открытый атлас · случайный участок':'Тренировка · случайный участок';document.querySelector('#atlas-description').textContent=data.description;document.querySelector('#map-coordinates').textContent=data.coords;document.querySelector('#mode-label').textContent=mode==='learn'?'Открытый атлас':'Бесконечная тренировка';document.querySelector('#mode-dot').style.background=mode==='learn'?'#1d5776':'#c85e4e';document.querySelector('#map-instruction').textContent=mode==='learn'?'Нажмите на объект для карточки':'Выберите положение объекта на карте';skyWrap.classList.toggle('is-practice',mode==='practice');renderMap();mode==='learn'?renderLearnPanel():renderPracticePanel();}
+function start(modeName){mode=modeName;randomZone();answer=null;marker=null;if(mode==='practice')setTarget();setView('atlas');updateScreen();}
+function setTarget(){const items=zone().objects.map(objectFrom);let target=items[Math.floor(Math.random()*items.length)];if(items.length>1&&currentTarget){while(target.id===currentTarget.id)target=items[Math.floor(Math.random()*items.length)];}currentTarget=target;}
+function nextPractice(){answer=null;marker=null;if(Math.random()>.55)randomZone();setTarget();updateScreen();}
+function nextMap(){randomZone();answer=null;marker=null;if(mode==='practice')setTarget();updateScreen();showToast('Открыта новая случайная карта.');}
+function mapPoint(event){const box=map.getBoundingClientRect();return{x:(event.clientX-box.left)/box.width*1200,y:(event.clientY-box.top)/box.height*760};}
+function attempt(event){if(mode!=='practice'||answer)return;marker=mapPoint(event);const distance=Math.hypot(marker.x-currentTarget.x,marker.y-currentTarget.y);answer={correct:distance<43};if(answer.correct){score++;streak++;showToast(`Верно — ${currentTarget.id} найден.`);}else{streak=0;showToast(`Точный ответ отмечен окружностью.`);}updateScreen();}
+function updateLayers(){layers.figures.style.display=document.querySelector('#figures-toggle').checked?'':'none';layers.boundary.style.display=document.querySelector('#figures-toggle').checked?'':'none';layers.stars.style.display=document.querySelector('#stars-toggle').checked?'':'none';map.querySelector('rect:nth-of-type(2)').style.display=document.querySelector('#grid-toggle').checked?'':'none';}
+function showToast(text){toast.textContent=text;toast.classList.add('is-visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('is-visible'),3300);}
+document.addEventListener('click',(event)=>{const action=event.target.closest('[data-action]')?.dataset.action;if(!action)return;if(action==='home')setView('home');if(action==='open-tour')setView('tour');if(action==='start-learn')start('learn');if(action==='start-practice')start('practice');if(action==='next-learn'||action==='new-map')nextMap();if(action==='next-practice')nextPractice();});
+map.addEventListener('click',attempt);['figures-toggle','stars-toggle','grid-toggle'].forEach((id)=>document.querySelector(`#${id}`).addEventListener('change',updateLayers));
+renderMinor();updateScreen();
