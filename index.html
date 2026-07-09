@@ -54,7 +54,7 @@
           <button class="link-back" data-action="home" type="button">← На главную</button>
           <p class="eyebrow"><span class="eyebrow__dot"></span> Наблюдательный тур</p>
           <h1 id="tour-title">Выбери свой<br /><em>маршрут.</em></h1>
-          <p>В обоих режимах карта строится из настоящих астрономических каталогов. Отличается только количество подсказок.</p>
+          <p>Каталог даёт вращаемую небесную полусферу, а обучение и тренировка — компактные поля 36–40° с несколькими связанными объектами.</p>
           <div class="tour-source"><span>✦</span><p><b>Без условных схем.</b><br />Координаты звёзд, объектов и линии созвездий сохраняют их положение на небесной сфере.</p></div>
         </div>
         <div class="mode-grid">
@@ -62,8 +62,8 @@
             <div class="mode-card__art"><span class="little-star little-star--a"></span><span class="little-star little-star--b"></span><i></i><i></i><em>М 13</em></div>
             <p class="card-kicker">01 · С ПОДСКАЗКАМИ</p>
             <h2>Обучение</h2>
-            <p>Открытый каталог. Нажимай на объекты Мессье, изучай их на реальной карте и переключай бесконечные случайные области неба.</p>
-            <ul><li>Подписи объектов Мессье</li><li>Имена ярких звёзд</li><li>Фигуры созвездий</li></ul>
+            <p>Небольшие учебные поля 36–40°. На одной карте — несколько близких объектов Мессье, реальные звёзды и понятные ориентиры.</p>
+            <ul><li>2–6 объектов на поле</li><li>Имена ярких звёзд</li><li>Фигуры созвездий</li></ul>
             <button class="button button--card" data-action="start-learn" type="button">Открыть атлас <span>→</span></button>
           </article>
           <article class="mode-card mode-card--practice">
@@ -82,7 +82,7 @@
         <div class="atlas-title-row"><div><p class="eyebrow" id="atlas-kicker"><span class="eyebrow__dot"></span> Реальная карта · J2000</p><h1 id="atlas-title">Окрестности M13</h1></div><p id="atlas-description">На круговой карте показана видимая небесная полусфера. Положение точек соответствует каталожным координатам.</p></div>
         <div class="atlas-layout">
           <section class="map-shell" aria-label="Реальная карта звёздного неба">
-            <div class="map-shell__header"><span id="map-coordinate">ЦЕНТР: RA 16h 41m · DEC +36°</span><span class="map-shell__key"><i></i> ВОСТОК СЛЕВА · СЕВЕР СВЕРХУ</span></div>
+            <div class="map-shell__header"><span id="map-coordinate">ЦЕНТР: RA 16h 41m · DEC +36°</span><span id="map-fov">ПОЛЕ 36°</span><span class="map-shell__key"><i></i> ВОСТОК СЛЕВА · СЕВЕР СВЕРХУ</span></div>
             <div class="map-stage">
               <canvas id="atlas-canvas" class="sky-canvas" role="img" aria-label="Интерактивная круговая карта звёздного неба"></canvas>
               <div class="map-stage__north">N</div><div class="map-stage__east">E</div><div class="map-stage__south">S</div><div class="map-stage__west">W</div>
