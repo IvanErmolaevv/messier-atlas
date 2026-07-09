@@ -1,63 +1,121 @@
-const layers = {
-  minor: document.querySelector('#minor-stars'), boundary: document.querySelector('#boundary-layer'),
-  figures: document.querySelector('#figure-layer'), stars: document.querySelector('#star-layer'),
-  messier: document.querySelector('#messier-layer'), answers: document.querySelector('#answer-layer'), markers: document.querySelector('#marker-layer')
-};
-const map = document.querySelector('#sky-map');
-const skyWrap = document.querySelector('.sky-wrap');
-const sidePanel = document.querySelector('#side-panel');
+const DATA_ROOT = 'https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/';
+const urls = { stars: `${DATA_ROOT}stars.6.json`, lines: `${DATA_ROOT}constellations.lines.json`, messier: `${DATA_ROOT}messier.json`, names: `${DATA_ROOT}starnames.json` };
+const constellationNames = {And:'Андромеда',Ant:'Насос',Aps:'Райская Птица',Aqr:'Водолей',Aql:'Орёл',Ara:'Жертвенник',Ari:'Овен',Aur:'Возничий',Boo:'Волопас',Cae:'Резец',Cam:'Жираф',Cnc:'Рак',CVn:'Гончие Псы',CMa:'Большой Пёс',CMi:'Малый Пёс',Cap:'Козерог',Car:'Киль',Cas:'Кассиопея',Cen:'Центавр',Cep:'Цефей',Cet:'Кит',Cha:'Хамелеон',Cir:'Циркуль',Col:'Голубь',Com:'Волосы Вероники',CrA:'Южная Корона',CrB:'Северная Корона',Crv:'Ворон',Crt:'Чаша',Cru:'Южный Крест',Cyg:'Лебедь',Del:'Дельфин',Dor:'Золотая Рыба',Dra:'Дракон',Equ:'Малый Конь',Eri:'Эридан',For:'Печь',Gem:'Близнецы',Gru:'Журавль',Her:'Геркулес',Hor:'Часы',Hya:'Гидра',Hyi:'Южная Гидра',Ind:'Индеец',Lac:'Ящерица',Leo:'Лев',LMi:'Малый Лев',Lep:'Заяц',Lib:'Весы',Lup:'Волк',Lyn:'Рысь',Lyr:'Лира',Men:'Столовая Гора',Mic:'Микроскоп',Mon:'Единорог',Mus:'Муха',Nor:'Наугольник',Oct:'Октант',Oph:'Змееносец',Ori:'Орион',Pav:'Павлин',Peg:'Пегас',Per:'Персей',Phe:'Феникс',Pic:'Живописец',Psc:'Рыбы',PsA:'Южная Рыба',Pup:'Корма',Pyx:'Компас',Ret:'Сетка',Sge:'Стрела',Sgr:'Стрелец',Sco:'Скорпион',Scl:'Скульптор',Sct:'Щит',Ser:'Змея',Sex:'Секстант',Tau:'Телец',Tel:'Телескоп',Tri:'Треугольник',TrA:'Южный Треугольник',Tuc:'Тукан',UMa:'Большая Медведица',UMi:'Малая Медведица',Vel:'Паруса',Vir:'Дева',Vol:'Летучая Рыба',Vul:'Лисичка'};
+const typeNames = {gc:'шаровое скопление',oc:'рассеянное скопление',g:'галактика',sfr:'туманность',pn:'планетарная туманность',snr:'остаток сверхновой',dn:'тёмная туманность',en:'эмиссионная туманность',rn:'отражательная туманность'};
+const familiarMessier = {M1:'Крабовидная туманность',M6:'Бабочка',M7:'Скопление Птолемея',M8:'Лагуна',M13:'Большое скопление Геркулеса',M20:'Трёхраздельная туманность',M27:'Гантель',M31:'Галактика Андромеды',M33:'Галактика Треугольника',M42:'Туманность Ориона',M45:'Плеяды',M51:'Водоворот',M57:'Кольцевая туманность',M64:'Чёрный Глаз',M81:'Галактика Боде',M82:'Сигара',M101:'Вертушка',M104:'Сомбреро'};
+
+const homeCanvas = document.querySelector('#home-canvas');
+const atlasCanvas = document.querySelector('#atlas-canvas');
+const missionPanel = document.querySelector('#mission-panel');
+const mapLoading = document.querySelector('#map-loading');
 const toast = document.querySelector('#toast');
+const controls = { figures: document.querySelector('#figures-toggle'), names: document.querySelector('#names-toggle'), grid: document.querySelector('#grid-toggle'), objects: document.querySelector('#objects-toggle') };
+const sky = { ready:false, stars:[], lines:[], messier:[], names:{} };
+let mode = 'learn', field = { center:[-109.3,36.5], focusId:'M13' }, currentTarget = null, answer = null, marker = null, score = 0, streak = 0, toastTimer;
 
-const zones = [
-  { id:'summer', title:'Летний треугольник', constellation:'Лира · Лебедь · Геркулес', coords:'RA 18h–22h · DEC +10°–+50°', description:'Вега, Денеб и Альтаир создают самый удобный летний маршрут. Между ними — туманности и шаровые скопления, которые легко привязать к фигурам созвездий.',
-    stars:[['Вега','α Lyr',445,168,6],['Шелиак','β Lyr',497,274,3],['Денеб','α Cyg',786,154,5],['Садр','γ Cyg',710,280,4],['Альтаир','α Aql',670,492,5],['Таразед','γ Aql',628,519,3],['Рас Альгети','α Her',260,299,4],['Арктур','α Boo',150,232,5]],
-    figures:[['ЛИРА',430,102,'M445 168 L497 274 L457 320 L408 270 Z'],['ЛЕБЕДЬ',782,326,'M786 154 L710 280 L756 381 L670 492 M710 280 L631 330 M710 280 L810 351'],['ГЕРКУЛЕС',225,127,'M150 232 L223 196 L302 230 L332 324 L260 359 L193 305 Z'],['ОРЁЛ',612,582,'M628 519 L670 492 L721 531 M670 492 L661 585']],
-    objects:[['M13','Большое скопление Геркулеса','шаровое скопление',310,270],['M92','Шаровое скопление','шаровое скопление',232,188],['M57','Кольцевая туманность','планетарная туманность',469,237],['M27','Гантель','планетарная туманность',653,286],['M15','Скопление Пегаса','шаровое скопление',975,211],['M39','Рассеянное скопление','рассеянное скопление',841,126]] },
-  { id:'sagittarius', title:'Стрелец и Скорпион', constellation:'Стрелец · Скорпион · Змееносец', coords:'RA 16h–19h · DEC −40°–−5°', description:'Самая плотная часть Млечного Пути. Ищите «чайник» Стрельца и крючок Скорпиона — рядом собраны туманности и скопления Мессье.',
-    stars:[['Антарес','α Sco',295,268,6],['Шаула','λ Sco',428,514,4],['Каус Аустралис','ε Sgr',762,486,4],['Нунки','σ Sgr',708,314,4],['Сабик','η Oph',497,170,4],['Аль Насл','γ Sgr',624,447,3]],
-    figures:[['СКОРПИОН',176,170,'M295 268 L243 326 L218 394 L274 464 L355 441 L402 487 L428 514'],['СТРЕЛЕЦ',655,212,'M624 447 L690 393 L762 486 L802 406 L747 334 L708 314 L690 393 M747 334 L810 296'],['ЗМЕЕНОСЕЦ',438,91,'M497 170 L450 235 L475 314 L548 336 L592 271 L497 170']],
-    objects:[['M6','Бабочка','рассеянное скопление',361,444],['M7','Скопление Птолемея','рассеянное скопление',406,480],['M8','Лагуна','эмиссионная туманность',646,440],['M20','Трёхраздельная','эмиссионная туманность',692,419],['M22','Шаровое скопление','шаровое скопление',710,356],['M24','Облако Стрельца','звёздное облако',757,371]] },
-  { id:'spring', title:'Весенние галактики', constellation:'Большая Медведица · Гончие Псы · Волосы Вероники', coords:'RA 11h–14h · DEC +30°–+65°', description:'Здесь нет яркой Млечной Дороги — зато в телескопе одна за другой открываются далёкие галактики. Ориентир — ковш Большой Медведицы.',
-    stars:[['Дубхе','α UMa',252,181,5],['Мерак','β UMa',336,254,4],['Алиот','ε UMa',468,302,5],['Мицар','ζ UMa',570,335,4],['Алькаид','η UMa',674,358,4],['Кор Кароли','α CVn',512,520,4],['Арктур','α Boo',787,584,6]],
-    figures:[['БОЛЬШАЯ МЕДВЕДИЦА',242,99,'M252 181 L336 254 L437 220 L468 302 L570 335 L674 358 L744 413 M437 220 L468 302'],['ГОНЧИЕ ПСЫ',467,461,'M512 520 L585 477 L623 531'],['ВОЛОСЫ ВЕРОНИКИ',735,487,'M674 358 L735 442 L787 584 L853 495']],
-    objects:[['M51','Водоворот','спиральная галактика',606,316],['M63','Подсолнух','спиральная галактика',559,393],['M94','Галактика Кошачий глаз','спиральная галактика',487,458],['M101','Вертушка','спиральная галактика',683,242],['M64','Чёрный глаз','спиральная галактика',640,468],['M106','Галактика','спиральная галактика',388,362]] },
-  { id:'winter', title:'Зимние скопления', constellation:'Возничий · Близнецы · Большой Пёс', coords:'RA 5h–8h · DEC −25°–+45°', description:'Холодный сезон — лучшее время для ярких рассеянных скоплений. Двигайтесь от Капеллы к звёздам Близнецов и вниз, к Сириусу.',
-    stars:[['Капелла','α Aur',342,150,6],['Менкалинан','β Aur',417,256,4],['Кастор','α Gem',665,185,5],['Поллукс','β Gem',633,278,5],['Бетельгейзе','α Ori',450,465,5],['Сириус','α CMa',770,585,6]],
-    figures:[['ВОЗНИЧИЙ',266,89,'M342 150 L417 256 L366 344 L281 286 Z'],['БЛИЗНЕЦЫ',596,105,'M665 185 L633 278 L605 375 M665 185 L735 264 L761 360'],['БОЛЬШОЙ ПЁС',697,459,'M610 450 L688 516 L770 585 L850 526']],
-    objects:[['M35','Рассеянное скопление','рассеянное скопление',687,307],['M36','Рассеянное скопление','рассеянное скопление',339,257],['M37','Рассеянное скопление','рассеянное скопление',381,290],['M38','Морская звезда','рассеянное скопление',293,277],['M41','Рассеянное скопление','рассеянное скопление',743,545],['M46','Рассеянное скопление','рассеянное скопление',622,570]] }
-];
+const radians = (d) => d * Math.PI / 180;
+const degrees = (r) => r * 180 / Math.PI;
+const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
+const wrapLon = (lon) => ((lon + 180) % 360 + 360) % 360 - 180;
+const randomBetween = (min,max) => Math.random() * (max-min) + min;
+const currentObject = () => sky.messier.find((object) => object.id === field.focusId);
+const objectName = (object) => familiarMessier[object.id] || object.properties.alt || object.properties.desig || 'объект каталога';
+const objectType = (object) => typeNames[object.properties.type] || 'объект глубокого неба';
 
-let currentZone = 0, mode = 'learn', currentTarget = null, answer = null, marker = null, score = 0, streak = 0, toastTimer;
-const el = (name, attrs={}, text='') => { const node=document.createElementNS('http://www.w3.org/2000/svg',name); Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v)); if(text)node.textContent=text; return node; };
-const zone = () => zones[currentZone];
-const objectFrom = (item) => ({id:item[0],name:item[1],type:item[2],x:item[3],y:item[4]});
-
-function setView(name){
-  ['home','tour','atlas'].forEach((view)=>{const section=document.querySelector(`#${view}-view`);section.hidden=view!==name;section.classList.toggle('is-active',view===name);});
+function setView(name) {
+  ['home','tour','atlas'].forEach((view) => { const element = document.querySelector(`#${view}-view`); element.hidden = view !== name; element.classList.toggle('is-active', view === name); });
   window.scrollTo({top:0,behavior:'auto'});
+  requestAnimationFrame(renderAll);
 }
-function randomZone(){let next=currentZone;if(zones.length>1){while(next===currentZone)next=Math.floor(Math.random()*zones.length);}currentZone=next;}
-function renderMinor(){layers.minor.innerHTML='';for(let i=0;i<115;i++){const x=((i*137.5)%1160)+20,y=((i*71.3)%720)+15;layers.minor.append(el('circle',{class:'minor-star',cx:x,cy:y,r:[.6,.8,1,1.2][i%4],opacity:.22+(i%5)*.1}));}}
-function renderMap(){
-  const data=zone(); layers.boundary.innerHTML='';layers.figures.innerHTML='';layers.stars.innerHTML='';layers.messier.innerHTML='';layers.answers.innerHTML='';layers.markers.innerHTML='';
-  data.figures.forEach(([name,x,y,path],index)=>{layers.boundary.append(el('path',{class:'constellation-boundary',d:path.replaceAll('M','M').replaceAll(' L',' L')}));layers.figures.append(el('path',{class:'constellation-figure',d:path}));layers.figures.append(el('text',{class:'constellation-label',x,y},name));});
-  data.stars.forEach(([name,latin,x,y,r])=>{const g=el('g',{});g.append(el('circle',{class:'bright-star',cx:x,cy:y,r:r+4,opacity:.14}));g.append(el('circle',{class:'bright-star',cx:x,cy:y,r}));g.append(el('circle',{class:'bright-star-core',cx:x,cy:y,r:Math.max(1.4,r/3)}));g.append(el('text',{class:'star-name',x:x+11,y:y-7},name));g.append(el('text',{class:'star-sub',x:x+11,y:y+9},latin));layers.stars.append(g);});
-  if(mode==='learn')data.objects.forEach((item)=>{const object=objectFrom(item),g=el('g',{class:'messier-object',role:'button',tabindex:'0','aria-label':`${object.id}, ${object.name}`});g.append(el('circle',{class:'object-halo',cx:object.x,cy:object.y,r:19}));g.append(el('circle',{class:'object-core',cx:object.x,cy:object.y,r:5.5}));g.append(el('line',{class:'object-guide',x1:object.x+7,y1:object.y-4,x2:object.x+25,y2:object.y-18}));g.append(el('text',{class:'object-id',x:object.x+29,y:object.y-20},object.id));g.append(el('text',{class:'object-name',x:object.x+29,y:object.y-7},object.name));g.addEventListener('click',(event)=>{event.stopPropagation();showToast(`${object.id} — ${object.name}, ${object.type}.`);});layers.messier.append(g);});
-  if(mode==='practice'&&answer){const ringClass=answer.correct?'answer-ring':'answer-ring is-wrong';layers.answers.append(el('circle',{class:ringClass,cx:currentTarget.x,cy:currentTarget.y,r:25}));}
-  if(marker){layers.markers.append(el('circle',{class:'placed-marker',cx:marker.x,cy:marker.y,r:10}));layers.markers.append(el('text',{class:'placed-marker-label',x:marker.x,y:marker.y+25},currentTarget.id));}
-  updateLayers();
+
+function project(coordinates, center, radius, cx, cy) {
+  const [lon,lat] = coordinates, [lon0,lat0] = center;
+  const lambda = radians(lon), phi = radians(lat), lambda0 = radians(lon0), phi0 = radians(lat0);
+  const delta = lambda-lambda0;
+  const cosc = Math.sin(phi0)*Math.sin(phi) + Math.cos(phi0)*Math.cos(phi)*Math.cos(delta);
+  if (cosc < 0) return null;
+  return { x:cx + radius*Math.cos(phi)*Math.sin(delta), y:cy - radius*(Math.cos(phi0)*Math.sin(phi) - Math.sin(phi0)*Math.cos(phi)*Math.cos(delta)), cosc };
 }
-function renderLearnPanel(){const points=zone().objects.map((item)=>{const object=objectFrom(item);return `<div class="zone-point"><span class="zone-point__id">${object.id}</span><span><strong>${object.name}</strong><small>${object.type}</small></span></div>`;}).join('');sidePanel.innerHTML=`<p class="overline">Открытый атлас</p><h2>${zone().title}</h2><p class="intro">Участок можно изучать сколько угодно: новая карта выбирается случайно, а подписи остаются на месте.</p><div class="zone-points">${points}</div><button class="primary-button" data-action="next-learn" type="button">Следующий случайный участок <span>→</span></button><button class="secondary-button" data-action="start-practice" type="button">Проверить себя без подписей</button>`;}
-function renderPracticePanel(){const result=answer?`<p class="answer-copy ${answer.correct?'':'is-wrong'}">${answer.correct?'Точно! Вы нашли объект по звёздным ориентирам.':'Почти. Окружность на карте показывает точное место объекта.'}</p>`:`<p class="answer-copy">Ориентируйтесь по фигурам созвездий и ярким звёздам. Метка появится после клика.</p>`;sidePanel.innerHTML=`<p class="overline">Бесконечная тренировка</p><h2>Поставьте метку<br />на карте</h2><p class="intro">Карта обновляется случайными участками. Названия Мессье скрыты.</p><div class="practice-target"><span class="practice-target__label">Найдите объект</span><strong>${currentTarget.id}</strong><span>${currentTarget.name}<br />${currentTarget.type}</span></div><div class="score-row"><span>Точно найдено</span><b>${score}</b><span>Серия: ${streak}</span></div>${result}<button class="primary-button" data-action="next-practice" type="button">${answer?'Следующий объект →':'Нужна метка на карте'}</button><button class="secondary-button" data-action="new-map" type="button">Случайная карта</button>`;const button=sidePanel.querySelector('[data-action="next-practice"]');if(!answer)button.disabled=true;}
-function updateScreen(){const data=zone();document.querySelector('#atlas-title').textContent=data.title;document.querySelector('#atlas-overline').textContent=mode==='learn'?'Открытый атлас · случайный участок':'Тренировка · случайный участок';document.querySelector('#atlas-description').textContent=data.description;document.querySelector('#map-coordinates').textContent=data.coords;document.querySelector('#mode-label').textContent=mode==='learn'?'Открытый атлас':'Бесконечная тренировка';document.querySelector('#mode-dot').style.background=mode==='learn'?'#1d5776':'#c85e4e';document.querySelector('#map-instruction').textContent=mode==='learn'?'Нажмите на объект для карточки':'Выберите положение объекта на карте';skyWrap.classList.toggle('is-practice',mode==='practice');renderMap();mode==='learn'?renderLearnPanel():renderPracticePanel();}
-function start(modeName){mode=modeName;randomZone();answer=null;marker=null;if(mode==='practice')setTarget();setView('atlas');updateScreen();}
-function setTarget(){const items=zone().objects.map(objectFrom);let target=items[Math.floor(Math.random()*items.length)];if(items.length>1&&currentTarget){while(target.id===currentTarget.id)target=items[Math.floor(Math.random()*items.length)];}currentTarget=target;}
-function nextPractice(){answer=null;marker=null;if(Math.random()>.55)randomZone();setTarget();updateScreen();}
-function nextMap(){randomZone();answer=null;marker=null;if(mode==='practice')setTarget();updateScreen();showToast('Открыта новая случайная карта.');}
-function mapPoint(event){const box=map.getBoundingClientRect();return{x:(event.clientX-box.left)/box.width*1200,y:(event.clientY-box.top)/box.height*760};}
-function attempt(event){if(mode!=='practice'||answer)return;marker=mapPoint(event);const distance=Math.hypot(marker.x-currentTarget.x,marker.y-currentTarget.y);answer={correct:distance<43};if(answer.correct){score++;streak++;showToast(`Верно — ${currentTarget.id} найден.`);}else{streak=0;showToast(`Точный ответ отмечен окружностью.`);}updateScreen();}
-function updateLayers(){layers.figures.style.display=document.querySelector('#figures-toggle').checked?'':'none';layers.boundary.style.display=document.querySelector('#figures-toggle').checked?'':'none';layers.stars.style.display=document.querySelector('#stars-toggle').checked?'':'none';map.querySelector('rect:nth-of-type(2)').style.display=document.querySelector('#grid-toggle').checked?'':'none';}
-function showToast(text){toast.textContent=text;toast.classList.add('is-visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('is-visible'),3300);}
-document.addEventListener('click',(event)=>{const action=event.target.closest('[data-action]')?.dataset.action;if(!action)return;if(action==='home')setView('home');if(action==='open-tour')setView('tour');if(action==='start-learn')start('learn');if(action==='start-practice')start('practice');if(action==='next-learn'||action==='new-map')nextMap();if(action==='next-practice')nextPractice();});
-map.addEventListener('click',attempt);['figures-toggle','stars-toggle','grid-toggle'].forEach((id)=>document.querySelector(`#${id}`).addEventListener('change',updateLayers));
-renderMinor();updateScreen();
+
+function inverseProject(x,y,center,radius) {
+  const rho = Math.hypot(x,y) / radius;
+  if (rho > 1) return null;
+  const [lon0,lat0] = center, phi0 = radians(lat0), lambda0 = radians(lon0), c = Math.asin(rho);
+  if (rho === 0) return center;
+  const north = -y / radius;
+  const phi = Math.asin(Math.cos(c)*Math.sin(phi0) + north*Math.sin(c)*Math.cos(phi0)/rho);
+  const lambda = lambda0 + Math.atan2((x/radius)*Math.sin(c),rho*Math.cos(phi0)*Math.cos(c)-north*Math.sin(phi0)*Math.sin(c));
+  return [wrapLon(degrees(lambda)),degrees(phi)];
+}
+
+function sphericalDistance(a,b) { const [a1,a2] = a.map(radians), [b1,b2] = b.map(radians); return degrees(Math.acos(clamp(Math.sin(a2)*Math.sin(b2)+Math.cos(a2)*Math.cos(b2)*Math.cos(a1-b1),-1,1))); }
+function circlePath(ctx,points,center,radius) { let drawing = false; ctx.beginPath(); points.forEach((coord) => { const point = project(coord,center,radius,0,0); if (!point) { drawing=false; return; } if (!drawing) ctx.moveTo(point.x,point.y); else ctx.lineTo(point.x,point.y); drawing=true; }); ctx.stroke(); }
+function starColor(bv) { if (bv === undefined || bv === null) return '#6e83a3'; if (bv < .1) return '#4777c5'; if (bv < .6) return '#536b8d'; if (bv < 1.15) return '#8d7b5a'; return '#9a6932'; }
+function starRadius(mag) { return clamp(4.4-(mag+1.2)*.57,.52,4.8); }
+function resizeCanvas(canvas) { const rect = canvas.getBoundingClientRect(); if (!rect.width || !rect.height) return null; const dpr = Math.min(window.devicePixelRatio || 1,2); const width = Math.round(rect.width*dpr), height = Math.round(rect.height*dpr); if (canvas.width!==width || canvas.height!==height) { canvas.width=width; canvas.height=height; } const context=canvas.getContext('2d'); context.setTransform(dpr,0,0,dpr,0,0); return {ctx:context,width:rect.width,height:rect.height}; }
+
+function drawGrid(ctx,center,radius,cx,cy) {
+  ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='rgba(127,155,210,.20)';ctx.lineWidth=.65;
+  for(let dec=-60;dec<=60;dec+=30){const coords=[];for(let lon=-180;lon<=180;lon+=2)coords.push([lon,dec]);circlePath(ctx,coords,center,radius);}
+  for(let lon=-180;lon<180;lon+=30){const coords=[];for(let dec=-89;dec<=89;dec+=2)coords.push([lon,dec]);circlePath(ctx,coords,center,radius);}
+  ctx.restore();
+}
+
+function drawConstellations(ctx,center,radius,cx,cy,showLabels) {
+  ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='rgba(38,84,150,.68)';ctx.lineWidth=1.05;ctx.lineCap='round';
+  const labelCandidates=[];
+  sky.lines.forEach((feature) => { const groups=feature.geometry.coordinates; groups.forEach((line)=>circlePath(ctx,line,center,radius)); const projected=groups.flat().map((coord)=>project(coord,center,radius,0,0)).filter(Boolean); if (showLabels && feature.properties.rank === '1' && projected.length>3) { const x=projected.reduce((sum,p)=>sum+p.x,0)/projected.length, y=projected.reduce((sum,p)=>sum+p.y,0)/projected.length; if (Math.hypot(x,y)<radius*.84) labelCandidates.push({x,y,name:constellationNames[feature.id]||feature.id}); } });
+  if(showLabels){ctx.font='700 9px Inter, sans-serif';ctx.fillStyle='rgba(37,76,135,.62)';ctx.textAlign='center';ctx.textBaseline='middle';const used=[];labelCandidates.forEach((label)=>{if(used.some((point)=>Math.hypot(point.x-label.x,point.y-label.y)<54))return;used.push(label);ctx.fillText(label.name,label.x,label.y);});}
+  ctx.restore();
+}
+
+function drawStars(ctx,center,radius,cx,cy,showNames) {
+  ctx.save();ctx.translate(cx,cy);const named=[];
+  sky.stars.forEach((star)=>{const point=project(star.geometry.coordinates,center,radius,0,0);if(!point)return;const mag=star.properties.mag;const r=starRadius(mag);ctx.beginPath();ctx.globalAlpha=clamp(.42+(6-mag)*.16,.4,1);ctx.fillStyle=starColor(star.properties.bv);ctx.arc(point.x,point.y,r,0,Math.PI*2);ctx.fill();if(showNames&&mag<1.75){const name=sky.names[star.id]?.ru||sky.names[star.id]?.name;if(name)named.push({x:point.x,y:point.y,name,mag});}});
+  if(showNames){ctx.globalAlpha=1;ctx.font='700 10px Inter, sans-serif';ctx.textBaseline='middle';const used=[];named.sort((a,b)=>a.mag-b.mag).forEach((star)=>{const label={x:star.x+8,y:star.y-7};if(used.some((p)=>Math.hypot(p.x-label.x,p.y-label.y)<48))return;used.push(label);ctx.fillStyle='rgba(26,47,91,.88)';ctx.fillText(star.name,label.x,label.y);});}
+  ctx.restore();
+}
+
+function visibleObjects(center=field.center) { return sky.messier.map((object)=>({object,point:project(object.geometry.coordinates,center,1,0,0)})).filter(({point})=>point); }
+function drawMessier(ctx,center,radius,cx,cy,showLabels) {
+  const objects=visibleObjects(center);ctx.save();ctx.translate(cx,cy);ctx.font='800 9px Inter, sans-serif';ctx.textBaseline='middle';
+  objects.forEach(({object,point})=>{const x=point.x*radius,y=point.y*radius;ctx.beginPath();ctx.fillStyle='#ed625f';ctx.globalAlpha=.16;ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.globalAlpha=1;ctx.fillStyle='#e65755';ctx.arc(x,y,3.1,0,Math.PI*2);ctx.fill();if(showLabels && (object.properties.mag<7 || object.id===field.focusId)){ctx.fillStyle='#b4474e';ctx.fillText(object.id,x+7,y-6);}});
+  if(mode==='practice'&&answer&&currentTarget){const point=project(currentTarget.geometry.coordinates,center,radius,0,0);if(point){ctx.strokeStyle=answer.correct?'#35a97a':'#e85f5c';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(point.x,point.y,14,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}}
+  if(marker){ctx.beginPath();ctx.fillStyle='#fff';ctx.strokeStyle='#1d68e8';ctx.lineWidth=2;ctx.arc(marker.x,marker.y,6,0,Math.PI*2);ctx.fill();ctx.stroke();}
+  ctx.restore();
+}
+
+function drawSky(canvas,center,options={}) {
+  const sized=resizeCanvas(canvas);if(!sized)return;const {ctx,width,height}=sized;ctx.clearRect(0,0,width,height);const radius=Math.min(width,height)*.462,cx=width/2,cy=height/2;
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.clip();ctx.fillStyle='#fcfdff';ctx.fillRect(0,0,width,height);ctx.translate(cx,cy);
+  if(options.grid)drawGrid(ctx,center,radius,0,0);drawStars(ctx,center,radius,0,0,options.names);if(options.figures)drawConstellations(ctx,center,radius,0,0,options.names);if(options.objects)drawMessier(ctx,center,radius,0,0,options.objectLabels);ctx.restore();
+  ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.strokeStyle='#233b6f';ctx.lineWidth=1.35;ctx.stroke();
+  return {radius,cx,cy,width,height};
+}
+
+function formatCoordinates([lon,lat]) { const hours=((lon+360)%360)/15, h=Math.floor(hours), min=Math.round((hours-h)*60); return `ЦЕНТР: RA ${String(h).padStart(2,'0')}h ${String(min).padStart(2,'0')}m · DEC ${lat>=0?'+':''}${lat.toFixed(0)}°`; }
+function randomField() { if(!sky.ready)return;let next=sky.messier[Math.floor(Math.random()*sky.messier.length)];if(sky.messier.length>1&&next.id===field.focusId){while(next.id===field.focusId)next=sky.messier[Math.floor(Math.random()*sky.messier.length)];}const [lon,lat]=next.geometry.coordinates;field={focusId:next.id,center:[wrapLon(lon+randomBetween(-13,13)),clamp(lat+randomBetween(-10,10),-75,75)]}; }
+function showToast(message) { toast.textContent=message;toast.classList.add('is-visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('is-visible'),3300); }
+
+function renderPanel() {
+  const focus=currentObject();if(!focus)return;const visible=visibleObjects().map(({object})=>object).sort((a,b)=>a.properties.mag-b.properties.mag);
+  if(mode==='learn'){missionPanel.innerHTML=`<p class="panel-kicker">ОБУЧЕНИЕ · ОТКРЫТЫЙ КАТАЛОГ</p><h2>Смотрите<br />настоящее небо</h2><p class="panel-text">Красные точки — реальные объекты Мессье. Нажмите на точку на карте или выберите новую область вокруг случайного объекта.</p><div class="field-card"><span class="field-card__label">ЦЕНТР МАРШРУТА</span><strong>${focus.id}</strong><small>${objectName(focus)} · ${objectType(focus)}</small></div><div class="object-list">${visible.slice(0,9).map((object)=>`<div class="object-list__item"><span class="object-list__id">${object.id}</span><span><b class="object-list__name">${objectName(object)}</b><small class="object-list__type">${objectType(object)}</small></span><span class="object-list__mag">${object.properties.mag.toFixed(1)}m</span></div>`).join('')}</div><button class="button panel-button" data-action="new-map" type="button">Другая случайная область <span>→</span></button>`;}
+  else {const target=currentTarget||focus;const result=answer?`<p class="answer-note ${answer.correct?'':'is-wrong'}">${answer.correct?'Точно! Метка находится в допуске 2,5° от реальной позиции объекта.':'Ответ показан кольцом на карте. Запомните его положение относительно ярких звёзд и линий.'}</p>`:'<p class="answer-note">Ориентируйтесь по фигурам созвездий и ярким звёздам. Поставьте метку в предполагаемом месте.</p>';missionPanel.innerHTML=`<p class="panel-kicker">ТРЕНИРОВКА · РЕАЛЬНАЯ КАРТА</p><h2>Найдите<br />объект</h2><p class="panel-text">Названия Мессье скрыты, но все реальные звёзды и правильные линии созвездий остаются.</p><div class="target-card"><span class="target-card__label">ВАША ЦЕЛЬ</span><strong>${target.id}</strong><span>${objectName(target)}<br />${objectType(target)}</span></div><div class="score-grid"><div><b>${score}</b><span>ТОЧНО НАЙДЕНО</span></div><div><b>${streak}</b><span>ТЕКУЩАЯ СЕРИЯ</span></div></div>${result}<button class="button panel-button" data-action="next-practice" type="button" ${answer?'':'disabled'}>${answer?'Следующий объект →':'Поставьте метку на карте'}</button><button class="panel-subbutton" data-action="new-map" type="button">Сменить область</button>`;}
+}
+
+function renderAtlasText() { const focus=currentObject();if(!focus)return;document.querySelector('#atlas-title').textContent=`Окрестности ${focus.id}`;document.querySelector('#atlas-kicker').innerHTML=`<span class="eyebrow__dot"></span> ${mode==='learn'?'Обучение · открытый каталог':'Тренировка · объект без подписи'}`;document.querySelector('#atlas-description').textContent=`Круг показывает настоящую небесную полусферу вокруг ${focus.id}. Положение каждой звезды и линии определяется координатами J2000.`;document.querySelector('#map-coordinate').textContent=formatCoordinates(field.center);document.querySelector('#map-hint').textContent=mode==='learn'?'Нажмите на красную точку, чтобы узнать объект':'Поставьте метку там, где должен быть объект';document.querySelector('#objects-control').style.opacity=mode==='practice'?'.42':'1';controls.objects.disabled=mode==='practice'; }
+function renderAtlas() {if(!sky.ready)return;renderAtlasText();renderPanel();drawSky(atlasCanvas,field.center,{grid:controls.grid.checked,figures:controls.figures.checked,names:controls.names.checked,objects:mode==='learn'&&controls.objects.checked,objectLabels:mode==='learn'});}
+function renderPreview(){if(sky.ready)drawSky(homeCanvas,[-97,31],{grid:false,figures:true,names:false,objects:false,objectLabels:false});}
+function renderAll(){renderPreview();if(!document.querySelector('#atlas-view').hidden)renderAtlas();}
+
+function start(nextMode){mode=nextMode;score=0;streak=0;answer=null;marker=null;randomField();currentTarget=mode==='practice'?currentObject():null;setView('atlas');renderAll();}
+function newMap(){randomField();answer=null;marker=null;if(mode==='practice')currentTarget=currentObject();renderAtlas();showToast('Открыта новая область настоящего неба.');}
+function nextPractice(){answer=null;marker=null;randomField();currentTarget=currentObject();renderAtlas();}
+function canvasCoordinates(event){const rect=atlasCanvas.getBoundingClientRect(),radius=Math.min(rect.width,rect.height)*.462;return {x:event.clientX-rect.left-rect.width/2,y:event.clientY-rect.top-rect.height/2,radius};}
+function mapClick(event){if(!sky.ready)return;const click=canvasCoordinates(event);if(Math.hypot(click.x,click.y)>click.radius)return;if(mode==='learn'){const hit=visibleObjects().map(({object})=>({object,point:project(object.geometry.coordinates,field.center,click.radius,0,0)})).find(({point})=>Math.hypot(point.x-click.x,point.y-click.y)<13);if(hit)showToast(`${hit.object.id} — ${objectName(hit.object)}. ${objectType(hit.object)}, ${hit.object.properties.mag.toFixed(1)}m.`);return;}if(answer)return;const picked=inverseProject(click.x,click.y,field.center,click.radius);if(!picked)return;marker={x:click.x,y:click.y};const distance=sphericalDistance(picked,currentTarget.geometry.coordinates);answer={correct:distance<=2.5,distance};if(answer.correct){score++;streak++;showToast(`Верно: ${currentTarget.id} найден с точностью ${distance.toFixed(1)}°.`);}else{streak=0;showToast(`Позиция ${currentTarget.id} показана кольцом. Ошибка: ${distance.toFixed(1)}°.`);}renderAtlas();}
+
+document.addEventListener('click',(event)=>{const action=event.target.closest('[data-action]')?.dataset.action;if(!action)return;if(action==='home')setView('home');if(action==='open-tour')setView('tour');if(action==='start-learn')start('learn');if(action==='start-practice')start('practice');if(action==='new-map')newMap();if(action==='next-practice')nextPractice();});
+atlasCanvas.addEventListener('click',mapClick);Object.values(controls).forEach((control)=>control.addEventListener('change',renderAtlas));window.addEventListener('resize',()=>requestAnimationFrame(renderAll));
+
+async function loadCatalog() { try { const responses=await Promise.all(Object.values(urls).map((url)=>fetch(url)));if(responses.some((response)=>!response.ok))throw new Error('Каталог недоступен');const [stars,lines,messier,names]=await Promise.all(responses.map((response)=>response.json()));sky.stars=stars.features;sky.lines=lines.features;sky.messier=messier.features;sky.names=names;sky.ready=true;mapLoading.classList.add('is-hidden');document.querySelector('#status-dot').classList.add('is-ready');document.querySelector('#status-text').textContent='КАТАЛОГ ЗАГРУЖЕН · J2000';randomField();renderAll();}catch(error){document.querySelector('#map-loading').innerHTML='<p>Не удалось загрузить каталог.<br />Проверьте подключение к интернету и обновите страницу.</p>';document.querySelector('#status-text').textContent='КАТАЛОГ НЕДОСТУПЕН';showToast('Каталог не загрузился: нужен доступ к открытому астрономическому источнику.');} }
+loadCatalog();
