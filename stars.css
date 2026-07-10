@@ -1,0 +1,43 @@
+.mode-card--stars {
+  background: linear-gradient(155deg, #f4f8ff 0%, #fbf8ff 58%, #f4f0ff 100%);
+}
+
+.mode-card--stars .mode-card__art {
+  background:
+    radial-gradient(circle at 56% 38%, #e7e2ff 0%, transparent 48%),
+    radial-gradient(circle at 28% 62%, #e4f2ff 0%, transparent 38%);
+}
+
+.mode-card--stars .little-star {
+  border-color: #7557d9;
+  box-shadow: 0 0 0 7px #eee9ff;
+}
+
+.mode-card--stars .mode-card__art i { border-color: #9f8ee8; }
+.mode-card--stars .mode-card__art em { color: #8970df; }
+.mode-card--stars .button--card { background: #eee9ff; color: #6248bd; }
+.mode-card--stars .card-kicker { color: #7458cf; }
+.mode-card--stars .mode-card__art .little-star--a { top: 28px; left: 23%; }
+.mode-card--stars .mode-card__art .little-star--b { top: 69px; left: 69%; }
+
+.mode-card__art--stars::after {
+  position: absolute;
+  top: 43px;
+  left: 48%;
+  color: #7557d9;
+  content: '✦';
+  font-size: 24px;
+  text-shadow: 0 0 16px #d8d0ff;
+}
+
+.map-shell__culture {
+  color: #6c5bc2;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+#objects-control[hidden] { display: none; }
+
+@media (max-width: 700px) {
+  .map-shell__culture { display: none; }
+}

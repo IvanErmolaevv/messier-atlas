@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f8faff" />
-    <meta name="description" content="Интерактивный атлас и тренажёр объектов Мессье на настоящей карте неба." />
-    <title>Messier — интерактивный атлас неба</title>
+    <meta name="description" content="Интерактивный атлас объектов Мессье и 200 ярких именованных звёзд на настоящей карте неба." />
+    <title>Messier &amp; Stars — интерактивный атлас неба</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="stars.css" />
   </head>
   <body>
     <header class="topbar">
@@ -17,7 +18,7 @@
         <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 37 23.4 9l14.2 28-14.1-10z"/><path d="M4 26.5C8.4 9.9 24.7 1.9 41.5 8.7"/><circle cx="39.6" cy="9.1" r="2.4"/></svg>
         <span>messier</span>
       </button>
-      <div class="topbar__facts" aria-label="Сведения об атласе"><span>110 объектов</span><i></i><span>реальное небо J2000</span></div>
+      <div class="topbar__facts" aria-label="Сведения об атласе"><span>110 объектов · 200 звёзд</span><i></i><span>Modern · Stellarium</span></div>
       <button class="topbar__tour" data-action="open-tour" type="button">Наблюдательный тур <span>→</span></button>
     </header>
 
@@ -25,11 +26,11 @@
       <section class="view view--home is-active" id="home-view" aria-labelledby="home-title">
         <div class="hero-copy">
           <p class="eyebrow"><span class="eyebrow__dot"></span> Интерактивный атлас</p>
-          <h1 id="home-title">Научись находить<br /><em>Мессье</em> на небе.</h1>
-          <p class="hero-copy__lede">Не декоративная схема, а настоящая карта звёздного неба: реальные координаты, плотность звёзд и правильные фигуры созвездий.</p>
+          <h1 id="home-title">Научись находить<br /><em>Мессье и звёзды</em>.</h1>
+          <p class="hero-copy__lede">Не декоративная схема, а настоящая карта звёздного неба: реальные координаты, плотность звёзд и фигуры созвездий Modern из Stellarium.</p>
           <button class="button button--primary button--hero" data-action="open-tour" type="button">Начать наблюдательный тур <span>↗</span></button>
           <div class="hero-proof" aria-label="Возможности атласа">
-            <span><b>J2000</b> небесные координаты</span><span><b>88</b> созвездий IAU</span><span><b>∞</b> случайных карт</span>
+            <span><b>J2000</b> небесные координаты</span><span><b>88</b> созвездий Modern</span><span><b>200</b> именованных звёзд</span>
           </div>
         </div>
         <div class="hero-visual">
@@ -54,8 +55,8 @@
           <button class="link-back" data-action="home" type="button">← На главную</button>
           <p class="eyebrow"><span class="eyebrow__dot"></span> Наблюдательный тур</p>
           <h1 id="tour-title">Выбери свой<br /><em>маршрут.</em></h1>
-          <p>Выберите учебное поле, вращаемую тренировку или отдельный каталог всей видимой небесной полусферы.</p>
-          <div class="tour-source"><span>✦</span><p><b>Без условных схем.</b><br />Координаты звёзд, объектов и линии созвездий сохраняют их положение на небесной сфере.</p></div>
+          <p>Выберите курс Мессье, курс звёзд, вращаемую тренировку или каталог всей видимой небесной полусферы.</p>
+          <div class="tour-source"><span>✦</span><p><b>Без условных схем.</b><br />Координаты сохраняют положение на небесной сфере, а линии взяты из культуры Modern по умолчанию в Stellarium.</p></div>
         </div>
         <div class="mode-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
           <article class="mode-card mode-card--learn">
@@ -66,9 +67,17 @@
             <ul><li>2–6 объектов на поле</li><li>Имена ярких звёзд</li><li>Фигуры созвездий</li></ul>
             <button class="button button--card" data-action="start-learn" type="button">Открыть атлас <span>→</span></button>
           </article>
+          <article class="mode-card mode-card--stars">
+            <div class="mode-card__art mode-card__art--stars"><span class="little-star little-star--a"></span><span class="little-star little-star--b"></span><i></i><i></i><em>★ 200</em></div>
+            <p class="card-kicker">02 · СОБСТВЕННЫЕ ИМЕНА</p>
+            <h2>Звёзды</h2>
+            <p>Курс по 200 ярким именованным звёздам. Сначала изучите участок неба, затем самостоятельно расставьте все звёздные метки.</p>
+            <ul><li>Топ-200 именных звёзд</li><li>Поля 30–40°</li><li>Modern / Современная</li></ul>
+            <button class="button button--card" data-action="start-star-learn" type="button">Начать курс звёзд <span>→</span></button>
+          </article>
           <article class="mode-card mode-card--practice">
             <div class="mode-card__art mode-card__art--target"><span></span><span></span><span></span><i></i><em>?</em></div>
-            <p class="card-kicker">02 · БЕЗ ПОДПИСЕЙ</p>
+            <p class="card-kicker">03 · БЕЗ ПОДПИСЕЙ</p>
             <h2>Тренировка</h2>
             <p>Получай случайный объект и вращай настоящую небесную полусферу 180°, пока не найдёшь его положение.</p>
             <ul><li>Вращаемая карта 180°</li><li>Случайная цель из каталога</li><li>Точная проверка позиции</li></ul>
@@ -76,7 +85,7 @@
           </article>
           <article class="mode-card mode-card--learn">
             <div class="mode-card__art"><span class="little-star little-star--a"></span><span class="little-star little-star--b"></span><i></i><i></i><em>180°</em></div>
-            <p class="card-kicker">03 · ВЕСЬ ВИДИМЫЙ КУПОЛ</p>
+            <p class="card-kicker">04 · ВЕСЬ ВИДИМЫЙ КУПОЛ</p>
             <h2>Каталог</h2>
             <p>Вращаемая карта 180° с отмеченными объектами Мессье. Рассматривайте всё небо и нажимайте на точки, чтобы узнать объект.</p>
             <ul><li>Все видимые объекты Мессье</li><li>Вращение мышью и пальцем</li><li>Настоящие звёзды и созвездия</li></ul>
@@ -90,7 +99,7 @@
         <div class="atlas-title-row"><div><p class="eyebrow" id="atlas-kicker"><span class="eyebrow__dot"></span> Реальная карта · J2000</p><h1 id="atlas-title">Окрестности M13</h1></div><p id="atlas-description">На круговой карте показана видимая небесная полусфера. Положение точек соответствует каталожным координатам.</p></div>
         <div class="atlas-layout">
           <section class="map-shell" aria-label="Реальная карта звёздного неба">
-            <div class="map-shell__header"><span id="map-coordinate">ЦЕНТР: RA 16h 41m · DEC +36°</span><span id="map-fov">ПОЛЕ 36°</span><span class="map-shell__key"><i></i> ВОСТОК СЛЕВА · СЕВЕР СВЕРХУ</span></div>
+            <div class="map-shell__header"><span id="map-coordinate">ЦЕНТР: RA 16h 41m · DEC +36°</span><span id="map-fov">ПОЛЕ 36°</span><span class="map-shell__key"><i></i> ВОСТОК СЛЕВА · СЕВЕР СВЕРХУ</span><span class="map-shell__culture" id="map-culture">MODERN / СОВРЕМЕННАЯ · STELLARIUM</span></div>
             <div class="map-stage">
               <canvas id="atlas-canvas" class="sky-canvas" role="img" aria-label="Интерактивная круговая карта звёздного неба"></canvas>
               <div class="map-stage__north">N</div><div class="map-stage__east">W</div><div class="map-stage__south">S</div><div class="map-stage__west">E</div>
@@ -102,15 +111,15 @@
               <label><input id="names-toggle" type="checkbox" checked /><span></span> Имена звёзд</label>
               <label><input id="grid-toggle" type="checkbox" checked /><span></span> Координатная сетка</label>
               <label id="objects-control"><input id="objects-toggle" type="checkbox" checked /><span></span> Объекты Мессье</label>
-              <span class="map-toolbar__legend"><i></i> настоящее положение</span>
+              <span class="map-toolbar__legend"><i></i> настоящие координаты</span>
             </div>
           </section>
           <aside class="mission-panel" id="mission-panel"></aside>
         </div>
-        <p class="catalog-credit">Координаты звёзд: XHIP / Hipparcos; объекты: каталог Мессье. Фигуры — распространённая европейская схема из d3-celestial. IAU официально закрепляет 88 созвездий и их границы, но не единственный рисунок линий.</p>
+        <p class="catalog-credit">Координаты звёзд: XHIP / Hipparcos; объекты: каталог Мессье. Линии и собственные имена: Modern / Современная — стандартная культура неба Stellarium. Границы и названия 88 созвездий закреплены IAU; рисунок линий — выбранная Stellarium современная схема.</p>
       </section>
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="script.js"></script>
+    <script src="script-stars.js"></script>
   </body>
 </html>
