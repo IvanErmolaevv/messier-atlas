@@ -38,6 +38,57 @@
 
 #objects-control[hidden] { display: none; }
 
+.map-zoom {
+  position: absolute;
+  z-index: 3;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid #dce6f6;
+  border-radius: 9px;
+  background: #fffffff0;
+  box-shadow: 0 10px 24px #365a9420;
+}
+
+.map-zoom[hidden] { display: none; }
+
+.map-zoom button {
+  min-width: 33px;
+  min-height: 36px;
+  border: 0;
+  border-right: 1px solid #e3e9f5;
+  background: transparent;
+  color: #3863ad;
+  font: 800 19px/1 Inter, Arial, sans-serif;
+}
+
+.map-zoom button:hover { background: #edf4ff; }
+.map-zoom button:last-child { border-right: 0; }
+
+.map-zoom .map-zoom__readout {
+  display: grid;
+  min-width: 88px;
+  padding: 5px 8px;
+  color: #243f76;
+  font-size: 10px;
+  line-height: 1.05;
+}
+
+.map-zoom__readout span { font-weight: 800; }
+.map-zoom__readout small { margin-top: 3px; color: #8290aa; font: 700 7px/1 Inter, Arial, sans-serif; letter-spacing: .035em; text-transform: uppercase; }
+
+.sky-canvas.is-rotatable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.sky-canvas.is-rotatable:active { cursor: grabbing; }
+
 @media (max-width: 700px) {
   .map-shell__culture { display: none; }
+  .map-zoom { top: 7px; right: 7px; }
+  .map-zoom button { min-width: 31px; min-height: 33px; }
+  .map-zoom .map-zoom__readout { min-width: 74px; padding-right: 5px; padding-left: 5px; }
 }

@@ -101,8 +101,11 @@ const degrees = (radiansValue) => radiansValue * 180 / Math.PI;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const wrapLon = (lon) => ((lon + 180) % 360 + 360) % 360 - 180;
 const randomBetween = (min, max) => Math.random() * (max - min) + min;
+const PANORAMA_FOV_MIN = 22;
+const PANORAMA_FOV_MAX = 180;
 const isStarLearn = () => mode === 'starLearn';
 const isLearningMode = () => mode === 'learn' || mode === 'starLearn';
+const isPanoramaMode = () => mode === 'catalog' || mode === 'practice';
 const objectById = (id) => sky.messier.find((object) => object.id === id);
 const currentObject = () => objectById(field.focusId);
 const objectName = (object) => familiarMessier[object.id] || object.properties.alt || object.properties.desig || 'объект каталога';
@@ -165,6 +168,20 @@ function sphericalDistance(a, b) {
   const [a1, a2] = a.map(radians);
   const [b1, b2] = b.map(radians);
   return degrees(Math.acos(clamp(Math.sin(a2) * Math.sin(b2) + Math.cos(a2) * Math.cos(b2) * Math.cos(a1 - b1), -1, 1)));
+}
+
+function zoomScaleText() {
+  const scale = PANORAMA_FOV_MAX / field.fov;
+  const formatted = scale.toFixed(scale < 3 ? 1 : 0).replace('.0', '');
+  return `×${formatted}`;
+}
+
+function setPanoramaFov(nextFov) {
+  if (!isPanoramaMode()) return;
+  const fov = clamp(nextFov, PANORAMA_FOV_MIN, PANORAMA_FOV_MAX);
+  if (Math.abs(fov - field.fov) < 0.01) return;
+  field = { ...field, fov };
+  renderAtlas();
 }
 
 function circlePath(ctx, points, center, radius, fov) {
@@ -722,7 +739,7 @@ function renderCatalogPanel() {
   const focus = currentObject();
   if (!focus) return;
   const visible = visibleObjects().map(({ object }) => object).sort((a, b) => a.properties.mag - b.properties.mag);
-  missionPanel.innerHTML = `<p class="panel-kicker">КАТАЛОГ · ПАНОРАМА 180°</p><h2>Вращайте<br />небесную сферу</h2><p class="panel-text">Карта 180° с отмеченными объектами Мессье и современными линиями созвездий Modern. Зажмите её мышью или пальцем и потяните в любую сторону.</p><div class="field-card"><span class="field-card__label">ТЕКУЩИЙ ОРИЕНТИР</span><strong>${focus.id}</strong><small>${escapeHtml(objectName(focus))} · ${escapeHtml(objectType(focus))}</small></div>${renderMessierList(visible.slice(0, 8))}<button class="button panel-button" data-action="new-map" type="button">Вернуть исходный вид <span>↺</span></button><button class="panel-subbutton" data-action="start-learn" type="button">Вернуться к урокам 36°</button>`;
+  missionPanel.innerHTML = `<p class="panel-kicker">КАТАЛОГ · КАРТА 360°</p><h2>Вращайте<br />небесную сферу</h2><p class="panel-text">Карта обзора 360° с отмеченными объектами Мессье и линиями созвездий Modern. Тяните карту для поворота, а колесо или кнопки +/− помогут приблизить нужный участок.</p><div class="field-card"><span class="field-card__label">ТЕКУЩИЙ ОРИЕНТИР</span><strong>${focus.id}</strong><small>${escapeHtml(objectName(focus))} · ${escapeHtml(objectType(focus))}</small></div>${renderMessierList(visible.slice(0, 8))}<button class="button panel-button" data-action="new-map" type="button">Вернуть обзор 360° <span>↺</span></button><button class="panel-subbutton" data-action="start-learn" type="button">Вернуться к урокам 36°</button>`;
 }
 
 function renderLearningPanel() {
@@ -759,7 +776,7 @@ function renderPracticePanel() {
   const result = practiceResult
     ? `<p class="answer-note ${practiceResult.correct ? '' : 'is-wrong'}">${practiceResult.correct ? 'Точно! Метка и объект совпали в пределах 2,5°.' : 'Кольцо показывает верное положение. Метку можно снова перетащить и проверить ещё раз.'}</p>`
     : '<p class="answer-note">Перетащите метку из боковой панели на карту, затем нажмите «Проверить».</p>';
-  missionPanel.innerHTML = `<p class="panel-kicker">ТРЕНИРОВКА · ПАНОРАМА 180°</p><h2>Найдите<br />объект</h2><p class="panel-text">Карта 180° вращается мышью или пальцем. Подписи Мессье скрыты, а настоящие звёзды и линии Modern остаются.</p><div class="target-card"><span class="target-card__label">ВАША ЦЕЛЬ</span><strong>${escapeHtml(target.label)}</strong><span>${escapeHtml(target.title)}<br />${escapeHtml(target.detail)}</span></div>${markerTray([target], 'ВАША ПЕРЕНОСИМАЯ МЕТКА')}<div class="score-grid"><div><b>${score}</b><span>ТОЧНО НАЙДЕНО</span></div><div><b>${streak}</b><span>ТЕКУЩАЯ СЕРИЯ</span></div></div>${result}<button class="button panel-button" data-action="check-practice" type="button" ${hasMarker ? '' : 'disabled'}>Проверить позицию <span>✓</span></button>${practiceResult ? '<button class="panel-subbutton" data-action="next-practice" type="button">Следующий объект</button>' : ''}<button class="panel-subbutton" data-action="new-map" type="button">Новая полусфера</button>`;
+  missionPanel.innerHTML = `<p class="panel-kicker">ТРЕНИРОВКА · КАРТА 360°</p><h2>Найдите<br />объект</h2><p class="panel-text">Карта обзора 360° поворачивается мышью или пальцем. Колесо и +/− приближают область, чтобы поставить метку точнее. Подписи Мессье скрыты, а звёзды и линии Modern остаются.</p><div class="target-card"><span class="target-card__label">ВАША ЦЕЛЬ</span><strong>${escapeHtml(target.label)}</strong><span>${escapeHtml(target.title)}<br />${escapeHtml(target.detail)}</span></div>${markerTray([target], 'ВАША ПЕРЕНОСИМАЯ МЕТКА')}<div class="score-grid"><div><b>${score}</b><span>ТОЧНО НАЙДЕНО</span></div><div><b>${streak}</b><span>ТЕКУЩАЯ СЕРИЯ</span></div></div>${result}<button class="button panel-button" data-action="check-practice" type="button" ${hasMarker ? '' : 'disabled'}>Проверить позицию <span>✓</span></button>${practiceResult ? '<button class="panel-subbutton" data-action="next-practice" type="button">Следующий объект</button>' : ''}<button class="panel-subbutton" data-action="new-map" type="button">Новая карта 360°</button>`;
 }
 
 function renderPanel() {
@@ -787,9 +804,9 @@ function renderAtlasText() {
 
   if (isCatalog) {
     title = 'Каталог объектов Мессье';
-    description = 'Вращаемая полусфера 180° с отмеченными объектами Мессье и линиями созвездий Modern / Современная из Stellarium.';
-    kicker = 'Каталог · Modern / Современная';
-    hint = 'Потяните карту для вращения или нажмите на объект';
+    description = 'Карта обзора 360° с отмеченными объектами Мессье и линиями созвездий Modern / Современная из Stellarium. Приближайте интересующие области для детального просмотра.';
+    kicker = 'Каталог · карта 360° · Modern';
+    hint = 'Тяните карту для поворота · колесо или +/− для масштаба';
   } else if (starsMode) {
     title = lesson?.title || 'Курс звёзд';
     description = isQuiz
@@ -807,22 +824,29 @@ function renderAtlasText() {
   } else {
     const focus = currentObject();
     title = `Тренировка: ${focus?.id || 'M13'}`;
-    description = `Вращаемая небесная полусфера 180°. Перетащите метку ${focus?.id || 'цели'} на правильное место и проверьте её.`;
-    kicker = 'Тренировка · вращаемая полусфера';
-    hint = 'Потяните карту для вращения или перетащите метку';
+    description = `Карта обзора 360°. Приблизьте нужный участок, перетащите метку ${focus?.id || 'цели'} на правильное место и проверьте её.`;
+    kicker = 'Тренировка · карта 360°';
+    hint = 'Тяните карту для поворота · колесо или +/− для точной метки';
   }
 
   document.querySelector('#atlas-title').textContent = title;
   document.querySelector('#atlas-kicker').innerHTML = `<span class="eyebrow__dot"></span> ${kicker}`;
   document.querySelector('#atlas-description').textContent = description;
   document.querySelector('#map-coordinate').textContent = formatCoordinates(field.center);
-  document.querySelector('#map-fov').textContent = `ПОЛЕ ${field.fov}°`;
+  document.querySelector('#map-fov').textContent = isRotatable
+    ? `ОБЗОР 360° · ПОЛЕ ${Math.round(field.fov)}°`
+    : `ПОЛЕ ${field.fov}°`;
   document.querySelector('#map-hint').textContent = hint;
   document.querySelector('#map-culture').textContent = sky.modernLoaded ? 'MODERN / СОВРЕМЕННАЯ · STELLARIUM' : 'ЗАПАДНАЯ СХЕМА · РЕЗЕРВ';
   const objectsControl = document.querySelector('#objects-control');
+  const mapZoom = document.querySelector('#map-zoom');
   objectsControl.hidden = starsMode;
   objectsControl.style.opacity = mode === 'practice' || isQuiz ? '0.42' : '1';
   controls.objects.disabled = starsMode || mode === 'practice' || isQuiz;
+  mapZoom.hidden = !isRotatable;
+  document.querySelector('#zoom-level').textContent = `360° · ${zoomScaleText()}`;
+  document.querySelector('#zoom-precision').textContent = field.fov >= PANORAMA_FOV_MAX - 0.1 ? 'полный обзор' : `поле ${Math.round(field.fov)}°`;
+  document.querySelector('#new-map-label').textContent = isRotatable ? 'Новая карта' : 'Новая область';
   atlasCanvas.classList.toggle('is-rotatable', isRotatable);
   mapStage.classList.toggle('is-rotatable', isRotatable);
 }
@@ -890,9 +914,9 @@ function newMap() {
   else choosePracticeField();
   renderAtlas();
   const message = mode === 'catalog'
-    ? 'Каталог возвращён к исходному виду.'
+    ? 'Карта 360° возвращена к исходному обзору.'
     : mode === 'practice'
-      ? 'Открыта новая полусфера для тренировки.'
+      ? 'Открыта новая карта 360° для тренировки.'
       : isStarLearn()
         ? 'Открыт новый участок курса звёзд.'
         : 'Открыта новая учебная область.';
@@ -993,7 +1017,7 @@ function startCanvasPointer(event) {
     beginCanvasMarkerDrag(event, markerId, point);
     return;
   }
-  if (['catalog', 'practice'].includes(mode)) beginRotation(event, point);
+  if (isPanoramaMode()) beginRotation(event, point);
 }
 
 function movePointer(event) {
@@ -1005,7 +1029,7 @@ function movePointer(event) {
     const dy = point.y - dragState.startY;
     const degreePerPixel = field.fov / (2 * dragState.radius);
     if (Math.hypot(dx, dy) > 2) dragState.moved = true;
-    field.center = [wrapLon(dragState.startCenter[0] + dx * degreePerPixel), clamp(dragState.startCenter[1] + dy * degreePerPixel, -84, 84)];
+    field = { ...field, center: [wrapLon(dragState.startCenter[0] + dx * degreePerPixel), clamp(dragState.startCenter[1] + dy * degreePerPixel, -84, 84)] };
     renderAtlas();
     return;
   }
@@ -1048,6 +1072,9 @@ document.addEventListener('click', (event) => {
   if (action === 'start-practice') start('practice');
   if (action === 'start-catalog') start('catalog');
   if (action === 'new-map') newMap();
+  if (action === 'zoom-in') setPanoramaFov(field.fov / 1.45);
+  if (action === 'zoom-out') setPanoramaFov(field.fov * 1.45);
+  if (action === 'zoom-reset') setPanoramaFov(PANORAMA_FOV_MAX);
   if (action === 'next-lesson') {
     if (isStarLearn()) chooseStarLesson();
     else chooseLesson();
@@ -1072,6 +1099,13 @@ document.addEventListener('pointerdown', (event) => {
 
 atlasCanvas.addEventListener('click', mapClick);
 atlasCanvas.addEventListener('pointerdown', startCanvasPointer);
+atlasCanvas.addEventListener('wheel', (event) => {
+  if (!sky.ready || !isPanoramaMode()) return;
+  const point = pointFromClient(event.clientX, event.clientY);
+  if (!point?.coordinates) return;
+  event.preventDefault();
+  setPanoramaFov(field.fov * Math.exp(clamp(event.deltaY, -120, 120) * 0.0015));
+}, { passive: false });
 document.addEventListener('pointermove', movePointer);
 document.addEventListener('pointerup', endPointer);
 document.addEventListener('pointercancel', endPointer);

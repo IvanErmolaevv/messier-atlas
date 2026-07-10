@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f8faff" />
-    <meta name="description" content="Интерактивный атлас объектов Мессье и 200 ярких именованных звёзд на настоящей карте неба." />
-    <title>Messier &amp; Stars — интерактивный атлас неба</title>
+    <meta name="description" content="astroqual — интерактивный атлас объектов Мессье и 200 ярких именованных звёзд на настоящей карте неба." />
+    <title>astroqual — интерактивный атлас неба</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -14,9 +14,9 @@
   </head>
   <body>
     <header class="topbar">
-      <button class="brand" data-action="home" type="button" aria-label="Messier — на главную">
+      <button class="brand" data-action="home" type="button" aria-label="astroqual — на главную">
         <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 37 23.4 9l14.2 28-14.1-10z"/><path d="M4 26.5C8.4 9.9 24.7 1.9 41.5 8.7"/><circle cx="39.6" cy="9.1" r="2.4"/></svg>
-        <span>messier</span>
+        <span>astroqual</span>
       </button>
       <div class="topbar__facts" aria-label="Сведения об атласе"><span>110 объектов · 200 звёзд</span><i></i><span>Modern · Stellarium</span></div>
       <button class="topbar__tour" data-action="open-tour" type="button">Наблюдательный тур <span>→</span></button>
@@ -55,7 +55,7 @@
           <button class="link-back" data-action="home" type="button">← На главную</button>
           <p class="eyebrow"><span class="eyebrow__dot"></span> Наблюдательный тур</p>
           <h1 id="tour-title">Выбери свой<br /><em>маршрут.</em></h1>
-          <p>Выберите курс Мессье, курс звёзд, вращаемую тренировку или каталог всей видимой небесной полусферы.</p>
+          <p>Выберите курс Мессье, курс звёзд, вращаемую тренировку или карту обзора 360°.</p>
           <div class="tour-source"><span>✦</span><p><b>Без условных схем.</b><br />Координаты сохраняют положение на небесной сфере, а линии взяты из культуры Modern по умолчанию в Stellarium.</p></div>
         </div>
         <div class="mode-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
@@ -79,24 +79,24 @@
             <div class="mode-card__art mode-card__art--target"><span></span><span></span><span></span><i></i><em>?</em></div>
             <p class="card-kicker">03 · БЕЗ ПОДПИСЕЙ</p>
             <h2>Тренировка</h2>
-            <p>Получай случайный объект и вращай настоящую небесную полусферу 180°, пока не найдёшь его положение.</p>
-            <ul><li>Вращаемая карта 180°</li><li>Случайная цель из каталога</li><li>Точная проверка позиции</li></ul>
+            <p>Получай случайный объект и двигай карту обзора 360°, пока не найдёшь его положение. Приближай нужный участок для точной метки.</p>
+            <ul><li>Вращаемая карта 360°</li><li>Колесо и кнопки масштаба</li><li>Точная проверка позиции</li></ul>
             <button class="button button--card" data-action="start-practice" type="button">Начать тренировку <span>→</span></button>
           </article>
           <article class="mode-card mode-card--learn">
-            <div class="mode-card__art"><span class="little-star little-star--a"></span><span class="little-star little-star--b"></span><i></i><i></i><em>180°</em></div>
+            <div class="mode-card__art"><span class="little-star little-star--a"></span><span class="little-star little-star--b"></span><i></i><i></i><em>360°</em></div>
             <p class="card-kicker">04 · ВЕСЬ ВИДИМЫЙ КУПОЛ</p>
             <h2>Каталог</h2>
-            <p>Вращаемая карта 180° с отмеченными объектами Мессье. Рассматривайте всё небо и нажимайте на точки, чтобы узнать объект.</p>
-            <ul><li>Все видимые объекты Мессье</li><li>Вращение мышью и пальцем</li><li>Настоящие звёзды и созвездия</li></ul>
-            <button class="button button--card" data-action="start-catalog" type="button">Открыть каталог 180° <span>→</span></button>
+            <p>Карта обзора 360° с отмеченными объектами Мессье. Приближайте нужные области и нажимайте на точки, чтобы узнать объект.</p>
+            <ul><li>Все видимые объекты Мессье</li><li>Вращение и масштаб</li><li>Настоящие звёзды и созвездия</li></ul>
+            <button class="button button--card" data-action="start-catalog" type="button">Открыть карту 360° <span>→</span></button>
           </article>
         </div>
       </section>
 
       <section class="view view--atlas" id="atlas-view" aria-labelledby="atlas-title" hidden>
-        <div class="atlas-top"><button class="link-back" data-action="open-tour" type="button">← Наблюдательный тур</button><div class="atlas-status"><span id="status-dot"></span><span id="status-text">ЗАГРУЖАЕМ КАТАЛОГ</span></div><button class="text-button" data-action="new-map" type="button">Новая область <span>↻</span></button></div>
-        <div class="atlas-title-row"><div><p class="eyebrow" id="atlas-kicker"><span class="eyebrow__dot"></span> Реальная карта · J2000</p><h1 id="atlas-title">Окрестности M13</h1></div><p id="atlas-description">На круговой карте показана видимая небесная полусфера. Положение точек соответствует каталожным координатам.</p></div>
+        <div class="atlas-top"><button class="link-back" data-action="open-tour" type="button">← Наблюдательный тур</button><div class="atlas-status"><span id="status-dot"></span><span id="status-text">ЗАГРУЖАЕМ КАТАЛОГ</span></div><button class="text-button" data-action="new-map" type="button"><span id="new-map-label">Новая область</span> <span>↻</span></button></div>
+        <div class="atlas-title-row"><div><p class="eyebrow" id="atlas-kicker"><span class="eyebrow__dot"></span> Реальная карта · J2000</p><h1 id="atlas-title">Окрестности M13</h1></div><p id="atlas-description">На круговой карте показано настоящее небо. Положение точек соответствует каталожным координатам.</p></div>
         <div class="atlas-layout">
           <section class="map-shell" aria-label="Реальная карта звёздного неба">
             <div class="map-shell__header"><span id="map-coordinate">ЦЕНТР: RA 16h 41m · DEC +36°</span><span id="map-fov">ПОЛЕ 36°</span><span class="map-shell__key"><i></i> ВОСТОК СЛЕВА · СЕВЕР СВЕРХУ</span><span class="map-shell__culture" id="map-culture">MODERN / СОВРЕМЕННАЯ · STELLARIUM</span></div>
@@ -104,6 +104,11 @@
               <canvas id="atlas-canvas" class="sky-canvas" role="img" aria-label="Интерактивная круговая карта звёздного неба"></canvas>
               <div class="map-stage__north">N</div><div class="map-stage__east">W</div><div class="map-stage__south">S</div><div class="map-stage__west">E</div>
               <p class="map-stage__hint" id="map-hint">Нажми на красную точку, чтобы узнать объект</p>
+              <div class="map-zoom" id="map-zoom" aria-label="Масштаб карты 360°" hidden>
+                <button data-action="zoom-out" type="button" aria-label="Отдалить карту" title="Отдалить">−</button>
+                <button class="map-zoom__readout" data-action="zoom-reset" type="button" aria-label="Показать весь обзор 360°" title="Сбросить масштаб"><span id="zoom-level">360°</span><small id="zoom-precision">полный обзор</small></button>
+                <button data-action="zoom-in" type="button" aria-label="Приблизить карту" title="Приблизить">+</button>
+              </div>
               <div class="map-stage__loading" id="map-loading"><span></span><p>Загружаю реальные звёзды<br />и созвездия…</p></div>
             </div>
             <div class="map-toolbar" aria-label="Слои карты">
