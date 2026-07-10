@@ -54,10 +54,10 @@
           <button class="link-back" data-action="home" type="button">← На главную</button>
           <p class="eyebrow"><span class="eyebrow__dot"></span> Наблюдательный тур</p>
           <h1 id="tour-title">Выбери свой<br /><em>маршрут.</em></h1>
-          <p>Каталог даёт вращаемую небесную полусферу, а обучение и тренировка — компактные поля 36–40° с несколькими связанными объектами.</p>
+          <p>Выберите учебное поле, вращаемую тренировку или отдельный каталог всей видимой небесной полусферы.</p>
           <div class="tour-source"><span>✦</span><p><b>Без условных схем.</b><br />Координаты звёзд, объектов и линии созвездий сохраняют их положение на небесной сфере.</p></div>
         </div>
-        <div class="mode-grid">
+        <div class="mode-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
           <article class="mode-card mode-card--learn">
             <div class="mode-card__art"><span class="little-star little-star--a"></span><span class="little-star little-star--b"></span><i></i><i></i><em>М 13</em></div>
             <p class="card-kicker">01 · С ПОДСКАЗКАМИ</p>
@@ -70,9 +70,17 @@
             <div class="mode-card__art mode-card__art--target"><span></span><span></span><span></span><i></i><em>?</em></div>
             <p class="card-kicker">02 · БЕЗ ПОДПИСЕЙ</p>
             <h2>Тренировка</h2>
-            <p>Получай случайный объект, ориентируйся по настоящему небу и ставь метку. После ответа сразу увидишь точную позицию.</p>
-            <ul><li>Случайная цель из каталога</li><li>Точная проверка позиции</li><li>Серия и счёт</li></ul>
+            <p>Получай случайный объект и вращай настоящую небесную полусферу 180°, пока не найдёшь его положение.</p>
+            <ul><li>Вращаемая карта 180°</li><li>Случайная цель из каталога</li><li>Точная проверка позиции</li></ul>
             <button class="button button--card" data-action="start-practice" type="button">Начать тренировку <span>→</span></button>
+          </article>
+          <article class="mode-card mode-card--learn">
+            <div class="mode-card__art"><span class="little-star little-star--a"></span><span class="little-star little-star--b"></span><i></i><i></i><em>180°</em></div>
+            <p class="card-kicker">03 · ВЕСЬ ВИДИМЫЙ КУПОЛ</p>
+            <h2>Каталог</h2>
+            <p>Вращаемая карта 180° с отмеченными объектами Мессье. Рассматривайте всё небо и нажимайте на точки, чтобы узнать объект.</p>
+            <ul><li>Все видимые объекты Мессье</li><li>Вращение мышью и пальцем</li><li>Настоящие звёзды и созвездия</li></ul>
+            <button class="button button--card" data-action="start-catalog" type="button">Открыть каталог 180° <span>→</span></button>
           </article>
         </div>
       </section>
